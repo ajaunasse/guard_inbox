@@ -1,0 +1,33 @@
+import type { HttpContext } from '@adonisjs/core/http'
+import ScanJob from '#models/scan_job'
+import EmailAccount from '#models/email_account'
+import EmailAccountPolicy from '#policies/email_account_policy'
+import ScanJobPolicy from '#policies/scan_job_policy'
+import { createScanValidator } from '#validators/create_scan_validator'
+
+export default class ScansController {
+    async index({ auth, response, bouncer }: HttpContext) {
+        const user = auth.user!
+        await bouncer.with(ScanJobPolicy).authorize('viewAny')
+        const jobs = await ScanJob.query().where('userId', user.id).orderBy('createdAt', 'desc').limit(20)
+        return response.ok(jobs)
+    }
+
+    async store({ request, response, auth, bouncer }: HttpContext) {
+        const user = auth.user!
+        await bouncer.with(ScanJobPolicy).authorize('create')
+        const data = await request.validateUsing(createScanValidator)
+
+        // Verify ownership
+        const account = await EmailAccount.query().where('id', data.emailAccountId).where('userId', user.id).firstOrFail()
+        await bouncer.with(EmailAccountPolicy).authorize('scan', account)
+
+        const job = await ScanJob.create({
+            userId: user.id,
+            emailAccountId: account.id,
+            status: 'PENDING',
+        })
+
+        return response.created(job)
+    }
+}

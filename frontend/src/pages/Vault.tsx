@@ -1,0 +1,163 @@
+import { useEffect, useState } from 'react';
+import api from '../api/client';
+import './Vault.css';
+
+interface PromoCode {
+    id: number;
+    code: string;
+    discountRaw: string | null;
+    brand: string;
+    summary: string | null;
+    category: string;
+    url: string | null;
+    expiresAt: string | null;
+    email: {
+        subject: string;
+        sentAt: string;
+    };
+}
+
+const getCategoryColor = (category: string): string => {
+    const colors: { [key: string]: string } = {
+        'Fashion': '#ec4899',
+        'Technology': '#3b82f6',
+        'Sports & Fitness': '#10b981',
+        'Beauty & Health': '#f97316',
+        'Food & Beverage': '#eab308',
+        'Home & Garden': '#8b5cf6',
+        'Travel': '#06b6d4',
+        'Entertainment': '#ef4444',
+        'Books & Media': '#6366f1',
+        'Services': '#64748b',
+        'Other': '#9ca3af',
+    };
+    return colors[category] || colors['Other'];
+};
+
+const isExpiringSoon = (expiresAt: string | null): boolean => {
+    if (!expiresAt) return false;
+    const expiry = new Date(expiresAt);
+    const now = new Date();
+    const daysUntilExpiry = (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+    return daysUntilExpiry > 0 && daysUntilExpiry <= 7;
+};
+
+const isExpired = (expiresAt: string | null): boolean => {
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
+};
+
+const formatExpiryDate = (expiresAt: string | null): string => {
+    if (!expiresAt) return '';
+    return new Date(expiresAt).toLocaleDateString();
+};
+
+const getBrandUrl = (brand: string): string => {
+    // Simple heuristic: try common patterns
+    const brandLower = brand.toLowerCase().replace(/\s+/g, '');
+    return `https://www.google.com/search?q=${encodeURIComponent(brand)}`;
+};
+
+export const Vault = () => {
+    const [codes, setCodes] = useState<PromoCode[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCodes = async () => {
+            try {
+                const res = await api.get('/promo-codes');
+                // Sort: expiring soon first, then by expiry date, then by created date
+                const sorted = res.data.data.sort((a: PromoCode, b: PromoCode) => {
+                    const aExpiringSoon = isExpiringSoon(a.expiresAt);
+                    const bExpiringSoon = isExpiringSoon(b.expiresAt);
+
+                    if (aExpiringSoon && !bExpiringSoon) return -1;
+                    if (!aExpiringSoon && bExpiringSoon) return 1;
+
+                    if (a.expiresAt && b.expiresAt) {
+                        return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
+                    }
+
+                    return new Date(b.email.sentAt).getTime() - new Date(a.email.sentAt).getTime();
+                });
+                setCodes(sorted);
+            } catch (error) {
+                console.error('Failed to fetch codes', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCodes();
+    }, []);
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        alert('Code copied!');
+    };
+
+    if (isLoading) return <div>Loading vault...</div>;
+
+    return (
+        <div className="vault-container">
+            <div className="vault-header">
+                <h1>Promo Vault</h1>
+                <p>Your collection of active codes</p>
+            </div>
+
+            <div className="vault-list">
+                {codes.map(code => {
+                    const expiringSoon = isExpiringSoon(code.expiresAt);
+                    const expired = isExpired(code.expiresAt);
+
+                    return (
+                        <a
+                            key={code.id}
+                            href={code.url || getBrandUrl(code.brand)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`vault-item ${expired ? 'expired' : ''}`}
+                        >
+                            <div className="vault-item-left">
+                                <div className="vault-header-row">
+                                    <div className="vault-vendor">{code.brand}</div>
+                                    <span
+                                        className="category-badge"
+                                        style={{ backgroundColor: getCategoryColor(code.category) }}
+                                    >
+                                        {code.category}
+                                    </span>
+                                    {expiringSoon && !expired && (
+                                        <span className="expire-soon-badge">Expires soon!</span>
+                                    )}
+                                    {expired && (
+                                        <span className="expired-badge">Expired</span>
+                                    )}
+                                </div>
+                                <div className="vault-discount">{code.discountRaw}</div>
+                                <div className="vault-subject">{code.summary || code.email.subject}</div>
+                                {code.expiresAt && (
+                                    <div className={`vault-expiry ${expiringSoon ? 'expiring-soon' : ''} ${expired ? 'expired' : ''}`}>
+                                        Expires: {formatExpiryDate(code.expiresAt)}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="vault-item-right">
+                                <div
+                                    className="code-display"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        copyToClipboard(code.code);
+                                    }}
+                                >
+                                    {code.code}
+                                    <span className="copy-icon" title="Copy">📋</span>
+                                </div>
+                            </div>
+                        </a>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
