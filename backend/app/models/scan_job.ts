@@ -15,7 +15,13 @@ export default class ScanJob extends BaseModel {
   declare emailAccountId: number
 
   @column()
-  declare status: 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED'
+  declare status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
+
+  @column()
+  declare emailsScanned: number | null
+
+  @column()
+  declare error: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

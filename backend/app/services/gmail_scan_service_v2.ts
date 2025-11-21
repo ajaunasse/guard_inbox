@@ -20,12 +20,13 @@ export default class GmailScanServiceV2 {
    */
   async scan(emailAccount: EmailAccount): Promise<number> {
     let processedCount = 0
+    const messagesToDelete: string[] = []
 
     // 1. Fetch messages from Gmail
     const messages = await this.gmailMessageFetcher.fetchMessages(
       emailAccount.accessToken,
       emailAccount.refreshToken,
-      50
+      200
     )
 
     console.log(`Found ${messages.length} messages to scan for account ${emailAccount.id}`)
@@ -58,7 +59,8 @@ export default class GmailScanServiceV2 {
           to: fullMessage.to,
           sentAt: fullMessage.sentAt ? DateTime.fromRFC2822(fullMessage.sentAt) : null,
           snippet: fullMessage.snippet,
-          metadata: {},
+          body: fullMessage.body,
+          size: fullMessage.size,
         })
 
         // 4. Extract promo details
@@ -104,10 +106,26 @@ export default class GmailScanServiceV2 {
           console.log(`Email ${msg.id} saved to trash - no promo found`)
         }
 
+        // Add to delete queue if auto-delete is enabled
+        if (emailAccount.autoDeleteEmails) {
+          messagesToDelete.push(msg.id)
+        }
+
         processedCount++
       } catch (error) {
         console.error(`Failed to process message ${msg.id}`, error)
       }
+    }
+
+    // 6. Delete emails from Gmail if auto-delete is enabled
+    if (emailAccount.autoDeleteEmails && messagesToDelete.length > 0) {
+      console.log(`Auto-delete enabled: moving ${messagesToDelete.length} emails to Gmail trash...`)
+      const deletedCount = await this.gmailMessageFetcher.batchTrashMessages(
+        emailAccount.accessToken,
+        emailAccount.refreshToken,
+        messagesToDelete
+      )
+      console.log(`Successfully moved ${deletedCount} emails to Gmail trash`)
     }
 
     return processedCount

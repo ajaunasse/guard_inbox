@@ -9,6 +9,7 @@ import { Vault } from './pages/Vault';
 import { Trash } from './pages/Trash';
 import { Tracking } from './pages/Tracking';
 import { Phishing } from './pages/Phishing';
+import { Newsletters } from './pages/Newsletters';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/trash" element={<Trash />} />
           <Route path="/tracking" element={<Tracking />} />
           <Route path="/phishing" element={<Phishing />} />
+          <Route path="/newsletters" element={<Newsletters />} />
         </Route>
 
         {/* Redirect root to dashboard or login */}

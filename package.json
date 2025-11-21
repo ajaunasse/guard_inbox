@@ -1,0 +1,23 @@
+{
+  "name": "cleanbox",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "typecheck:backend": "cd backend && npm run typecheck",
+    "format:backend": "cd backend && npm run format",
+    "format:frontend": "cd frontend && npm run format",
+    "test:backend": "cd backend && npm run test"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  }
+}

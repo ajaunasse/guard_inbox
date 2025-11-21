@@ -25,7 +25,11 @@ export default defineConfig({
   | will be scanned automatically from the "./commands" directory.
   |
   */
-  commands: [() => import('@adonisjs/core/commands'), () => import('@adonisjs/lucid/commands'), () => import('@adonisjs/bouncer/commands')],
+  commands: [
+    () => import('@adonisjs/core/commands'),
+    () => import('@adonisjs/lucid/commands'),
+    () => import('@adonisjs/bouncer/commands'),
+  ],
 
   /*
   |--------------------------------------------------------------------------
@@ -48,7 +52,12 @@ export default defineConfig({
     () => import('@adonisjs/lucid/database_provider'),
     () => import('@adonisjs/session/session_provider'),
     () => import('@adonisjs/auth/auth_provider'),
-    () => import('@adonisjs/bouncer/bouncer_provider')
+    () => import('@adonisjs/bouncer/bouncer_provider'),
+    {
+      file: () => import('#providers/queue_provider'),
+      environment: ['web'],
+    },
+    () => import('@adonisjs/limiter/limiter_provider'),
   ],
 
   /*

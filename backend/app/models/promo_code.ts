@@ -42,9 +42,9 @@ export default class PromoCode extends BaseModel {
 
   // Query Scopes
   static forUser = scope((query, userId: number) => {
-    query.whereHas('email', (emailQuery) => {
-      emailQuery.whereHas('emailAccount', (accountQuery) => {
-        accountQuery.where('userId', userId)
+    query.whereHas('email' as any, (emailQuery: any) => {
+      emailQuery.whereHas('emailAccount' as any, (accountQuery: any) => {
+        accountQuery.where('user_id', userId)
       })
     })
   })

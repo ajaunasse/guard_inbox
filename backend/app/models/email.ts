@@ -30,7 +30,10 @@ export default class Email extends BaseModel {
   declare snippet: string | null
 
   @column()
-  declare metadata: object | null
+  declare body: string | null
+
+  @column()
+  declare size: number | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -46,20 +49,20 @@ export default class Email extends BaseModel {
 
   // Query Scopes
   static forUser = scope((query, userId: number) => {
-    query.whereHas('emailAccount', (q) => {
-      q.where('userId', userId)
+    query.whereHas('emailAccount' as any, (q: any) => {
+      q.where('user_id', userId)
     })
   })
 
   static withPromoCodes = scope((query) => {
-    query.whereHas('promoCodes')
+    query.has('promoCodes' as any)
   })
 
   static withoutPromoCodes = scope((query) => {
-    query.whereDoesntHave('promoCodes')
+    query.doesntHave('promoCodes' as any)
   })
 
   static withRelations = scope((query) => {
-    query.preload('promoCodes').preload('emailAccount')
+    query.preload('promoCodes' as any).preload('emailAccount' as any)
   })
 }

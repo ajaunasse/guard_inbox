@@ -1,11 +1,182 @@
 .vault-container {
-    max-width: 800px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .vault-header {
-    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.vault-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.vault-header-left h1 {
+    margin-bottom: 0.25rem;
+    font-size: 1.5rem;
+}
+
+.vault-header-left p {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.vault-search {
+    position: relative;
+    min-width: 400px;
+}
+
+.vault-search-input {
+    width: 100%;
+    padding: 0.625rem 2.5rem 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.vault-search-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.clear-search {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.clear-search:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+/* Toggle Switch */
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background-color: #d1d5db;
+    border-radius: 12px;
+    transition: background-color 0.3s;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s;
+}
+
+.toggle-checkbox:checked + .toggle-slider {
+    background-color: var(--emerald-500);
+}
+
+.toggle-checkbox:checked + .toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.toggle-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    align-items: center;
+}
+
+.filters-divider {
+    height: 32px;
+    width: 1px;
+    background: var(--border-light);
+    margin: 0 0.5rem;
+}
+
+.category-filter-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.category-filter-btn:hover {
+    border-color: #d1d5db;
+    background-color: #f9fafb;
+}
+
+.category-filter-btn.active {
+    border-color: transparent;
+    color: white;
+}
+
+.empty-state-large {
     text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 1rem;
+    border: 2px dashed #e5e7eb;
+}
+
+.empty-state-large h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #374151;
 }
 
 .vault-list {
@@ -41,6 +212,7 @@
 .vault-item-left {
     display: flex;
     flex-direction: column;
+    max-width: 85%;
     gap: 0.5rem;
     flex: 1;
 }
@@ -97,7 +269,6 @@
 .vault-subject {
     color: #6b7280;
     font-size: 0.875rem;
-    max-width: 400px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

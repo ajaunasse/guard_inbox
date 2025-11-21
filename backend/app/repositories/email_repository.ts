@@ -9,7 +9,8 @@ export interface CreateEmailData {
   to: string
   sentAt: DateTime | null
   snippet: string
-  metadata?: object
+  body?: string
+  size?: number | null
 }
 
 export default class EmailRepository {

@@ -11,6 +11,7 @@
 ### Phase 4.2: Input Validation avec VineJS ✅
 
 **Package installé:**
+
 - `@vinejs/vine` - Validation framework pour AdonisJS
 
 **Fichiers créés:**
@@ -38,6 +39,7 @@
    - `store()`: Utilise `createScanValidator`
 
 **Bénéfices obtenus:**
+
 - ✅ Protection contre injections SQL/XSS
 - ✅ Erreurs 422 (Unprocessable Entity) au lieu de 500 (Server Error)
 - ✅ Messages d'erreur clairs pour le frontend
@@ -49,11 +51,13 @@
 ### Phase 4.3: Authorization avec Bouncer Policies ✅
 
 **Package installé:**
+
 - `@adonisjs/bouncer` - Framework d'autorisation pour AdonisJS
 
 **Fichiers créés:**
 
 1. **`app/policies/email_policy.ts`**
+
    ```typescript
    - view(user, email): Vérifie que l'email appartient à l'utilisateur
    - viewAny(user): Autorise les utilisateurs authentifiés à voir leurs emails
@@ -61,6 +65,7 @@
    ```
 
 2. **`app/policies/email_account_policy.ts`**
+
    ```typescript
    - view(user, emailAccount): Vérifie la propriété du compte
    - viewAny(user): Autorise les utilisateurs authentifiés
@@ -101,6 +106,7 @@
    - `codes()`: Autorisation `viewAny` sur les emails
 
 **Bénéfices obtenus:**
+
 - ✅ Protection contre l'accès non-autorisé aux données (user A ne peut pas accéder aux données de user B)
 - ✅ Logique d'autorisation centralisée et réutilisable
 - ✅ Erreurs 403 (Forbidden) automatiques en cas de tentative d'accès non-autorisé
@@ -114,6 +120,7 @@
 ### Avant le refactoring
 
 **Vulnérabilités critiques:**
+
 1. ❌ Aucune validation des inputs → risque d'injection SQL, XSS
 2. ❌ Pas de contrôle d'autorisation → utilisateur A peut accéder aux données de B
 3. ❌ Erreurs 500 au lieu de 400/422 → pas de feedback clair
@@ -122,12 +129,14 @@
 ### Après le refactoring
 
 **Sécurité renforcée:**
+
 1. ✅ Validation stricte de tous les inputs utilisateur
 2. ✅ Autorisation systématique sur toutes les ressources
 3. ✅ Erreurs HTTP appropriées (422, 403)
 4. ✅ Code centralisé, testable et maintenable
 
 **Résultat:**
+
 - **+150% de sécurité** (tokens chiffrés + validation + autorisation)
 - **100% de protection contre les injections**
 - **100% de contrôle d'accès sur les ressources critiques**
@@ -139,6 +148,7 @@
 ### Exemple 1: Validation automatique
 
 **Avant:**
+
 ```typescript
 async register({ request, response }: HttpContext) {
   const { email, password } = request.only(['email', 'password'])
@@ -149,6 +159,7 @@ async register({ request, response }: HttpContext) {
 ```
 
 **Après:**
+
 ```typescript
 async register({ request, response, auth }: HttpContext) {
   const data = await request.validateUsing(registerValidator)
@@ -167,6 +178,7 @@ async register({ request, response, auth }: HttpContext) {
 ### Exemple 2: Autorisation automatique
 
 **Avant:**
+
 ```typescript
 async destroy({ params, auth, response }: HttpContext) {
   const account = await EmailAccount.findOrFail(params.id)
@@ -177,6 +189,7 @@ async destroy({ params, auth, response }: HttpContext) {
 ```
 
 **Après:**
+
 ```typescript
 async destroy({ params, response, auth, bouncer }: HttpContext) {
   const user = auth.user!
