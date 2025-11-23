@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
+import { Toast } from '../components/Toast';
 import './Vault.css';
 
 interface PromoCode {
@@ -58,9 +59,27 @@ const getBrandUrl = (brand: string): string => {
     return `https://www.google.com/search?q=${encodeURIComponent(brand)}`;
 };
 
+const CATEGORIES = [
+    'All',
+    'Fashion',
+    'Technology',
+    'Sports & Fitness',
+    'Beauty & Health',
+    'Food & Beverage',
+    'Home & Garden',
+    'Travel',
+    'Entertainment',
+    'Books & Media',
+    'Services',
+    'Other',
+];
+
 export const Vault = () => {
     const [codes, setCodes] = useState<PromoCode[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState<string>('All');
+    const [searchBrand, setSearchBrand] = useState<string>('');
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -93,20 +112,94 @@ export const Vault = () => {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert('Code copied!');
+        setToast({ message: 'Code copied to clipboard!', type: 'success' });
     };
+
+    // Filter codes based on selected category and brand search
+    const filteredCodes = codes.filter(code => {
+        // Category filter
+        const matchesCategory = selectedCategory === 'All' || code.category === selectedCategory;
+
+        // Brand filter
+        const matchesBrand = searchBrand === '' ||
+            code.brand?.toLowerCase().includes(searchBrand.toLowerCase());
+
+        return matchesCategory && matchesBrand;
+    });
 
     if (isLoading) return <div>Loading vault...</div>;
 
     return (
-        <div className="vault-container">
+        <>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            <div className="vault-container">
             <div className="vault-header">
-                <h1>Promo Vault</h1>
-                <p>Your collection of active codes</p>
+                <div className="vault-header-left">
+                    <h1>Promo Vault</h1>
+                    <p>Your collection of active codes</p>
+                </div>
+                {codes.length > 0 && (
+                    <div className="vault-search">
+                        <input
+                            type="text"
+                            placeholder="Search by brand..."
+                            value={searchBrand}
+                            onChange={(e) => setSearchBrand(e.target.value)}
+                            className="vault-search-input"
+                        />
+                        {searchBrand && (
+                            <button
+                                onClick={() => setSearchBrand('')}
+                                className="clear-search"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
-            <div className="vault-list">
-                {codes.map(code => {
+            {/* Category Filters */}
+            {codes.length > 0 && (
+                <div className="category-filters">
+                    {CATEGORIES.map(category => (
+                        <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`category-filter-btn ${selectedCategory === category ? 'active' : ''}`}
+                            style={
+                                selectedCategory === category
+                                    ? category === 'All'
+                                        ? { backgroundColor: '#4f46e5', color: 'white', borderColor: 'transparent' }
+                                        : { backgroundColor: getCategoryColor(category), color: 'white', borderColor: 'transparent' }
+                                    : {}
+                            }
+                        >
+                            {category}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {codes.length === 0 ? (
+                <div className="empty-state-large">
+                    <h3>No codes in vault yet</h3>
+                    <p>Your saved promo codes will appear here.</p>
+                </div>
+            ) : filteredCodes.length === 0 ? (
+                <div className="empty-state-large">
+                    <h3>No codes match your filters</h3>
+                    <p>Try adjusting your category or brand search.</p>
+                </div>
+            ) : (
+                <div className="vault-list">
+                    {filteredCodes.map(code => {
                     const expiringSoon = isExpiringSoon(code.expiresAt);
                     const expired = isExpired(code.expiresAt);
 
@@ -157,7 +250,9 @@ export const Vault = () => {
                         </a>
                     );
                 })}
+                </div>
+            )}
             </div>
-        </div>
+        </>
     );
 };

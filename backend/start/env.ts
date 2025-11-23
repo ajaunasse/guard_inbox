@@ -30,6 +30,20 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_DATABASE: Env.schema.string(),
   DB_SSL: Env.schema.boolean.optional(),
 
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Redis connection
+  |----------------------------------------------------------
+  */
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+  REDIS_PASSWORD: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Google OAuth credentials
+  |----------------------------------------------------------
+  */
   GOOGLE_CLIENT_ID: Env.schema.string(),
   GOOGLE_CLIENT_SECRET: Env.schema.string(),
   GOOGLE_REDIRECT_URI: Env.schema.string(),
@@ -37,11 +51,23 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
+  | OpenAI configuration
+  |----------------------------------------------------------
+  */
+  OPENAI_API_KEY: Env.schema.string(),
+  OPENAI_ASSISTANT_ID: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Frontend URL
+  |----------------------------------------------------------
+  */
+  FRONTEND_URL: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
   | Variables for configuring session package
   |----------------------------------------------------------
   */
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory'] as const),
-
-  OPENAI_API_KEY: Env.schema.string(),
-  OPENAI_ASSISTANT_ID: Env.schema.string(),
 })

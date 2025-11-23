@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
 import { ScanLine, Trash2, Mail } from 'lucide-react';
+import { Toast } from '../components/Toast';
 import './Dashboard.css';
 
 interface EmailAccount {
@@ -12,7 +13,8 @@ interface EmailAccount {
 
 interface ScanJob {
     id: number;
-    status: 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED';
+    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+    emailsScanned?: number | null;
     createdAt: string;
 }
 
@@ -20,6 +22,7 @@ export const Dashboard = () => {
     const [accounts, setAccounts] = useState<EmailAccount[]>([]);
     const [jobs, setJobs] = useState<ScanJob[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
     const fetchData = async () => {
         try {
@@ -65,16 +68,25 @@ export const Dashboard = () => {
         try {
             await api.post('/scans', { emailAccountId: accountId });
             fetchData();
-            alert('Scan started! It will run in the background.');
+            setToast({ message: 'Scan started! It will run in the background.', type: 'info' });
         } catch (error) {
             console.error('Failed to start scan', error);
+            setToast({ message: 'Failed to start scan. Please try again.', type: 'error' });
         }
     };
 
     if (isLoading) return <div>Loading dashboard...</div>;
 
     return (
-        <div className="dashboard-container">
+        <>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            <div className="dashboard-container">
             <div className="dashboard-header">
                 <h1>Dashboard</h1>
                 <button onClick={handleConnect} className="btn btn-primary">
@@ -133,6 +145,7 @@ export const Dashboard = () => {
                             <tr>
                                 <th>ID</th>
                                 <th>Status</th>
+                                <th>Emails Scanned</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
@@ -141,10 +154,11 @@ export const Dashboard = () => {
                                 <tr key={job.id}>
                                     <td>#{job.id}</td>
                                     <td>
-                                        <span className={`status-badge status-${job.status.toLowerCase()}`}>
-                                            {job.status}
+                                        <span className={`status-badge status-${job.status.toLowerCase().replace('_', '-')}`}>
+                                            {job.status.replace('_', ' ')}
                                         </span>
                                     </td>
+                                    <td>{job.emailsScanned ?? '-'}</td>
                                     <td>{new Date(job.createdAt).toLocaleString()}</td>
                                 </tr>
                             ))}
@@ -152,6 +166,7 @@ export const Dashboard = () => {
                     </table>
                 )}
             </section>
-        </div>
+            </div>
+        </>
     );
 };

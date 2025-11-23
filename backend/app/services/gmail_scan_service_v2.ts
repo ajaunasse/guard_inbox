@@ -58,7 +58,7 @@ export default class GmailScanServiceV2 {
           to: fullMessage.to,
           sentAt: fullMessage.sentAt ? DateTime.fromRFC2822(fullMessage.sentAt) : null,
           snippet: fullMessage.snippet,
-          metadata: {},
+          body: fullMessage.body,
         })
 
         // 4. Extract promo details

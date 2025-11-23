@@ -4,6 +4,7 @@ import EmailAccount from '#models/email_account'
 import EmailAccountPolicy from '#policies/email_account_policy'
 import ScanJobPolicy from '#policies/scan_job_policy'
 import { createScanValidator } from '#validators/create_scan_validator'
+import { addEmailScanJob } from '#services/queue_service'
 
 export default class ScansController {
     async index({ auth, response, bouncer }: HttpContext) {
@@ -22,12 +23,19 @@ export default class ScansController {
         const account = await EmailAccount.query().where('id', data.emailAccountId).where('userId', user.id).firstOrFail()
         await bouncer.with(EmailAccountPolicy).authorize('scan', account)
 
-        const job = await ScanJob.create({
+        // Create scan job
+        const scanJob = await ScanJob.create({
             userId: user.id,
             emailAccountId: account.id,
             status: 'PENDING',
         })
 
-        return response.created(job)
+        // Add to queue for asynchronous processing
+        await addEmailScanJob(scanJob.id, account.id)
+
+        return response.created({
+            ...scanJob.toJSON(),
+            message: 'Scan job queued successfully'
+        })
     }
 }

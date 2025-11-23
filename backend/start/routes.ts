@@ -15,6 +15,7 @@ const EmailAccountsController = () => import('#controllers/email_accounts_contro
 const ScansController = () => import('#controllers/scans_controller')
 const PromosController = () => import('#controllers/promos_controller')
 const EmailsController = () => import('#controllers/emails_controller')
+const StatsController = () => import('#controllers/stats_controller')
 
 router.group(() => {
   router.post('auth/register', [AuthController, 'register'])
@@ -43,6 +44,9 @@ router.group(() => {
 
     // Emails
     router.get('emails/trash', [EmailsController, 'trash']) // Trash
+
+    // Stats
+    router.get('stats', [StatsController, 'index']) // Menu counts
   }).use(middleware.auth())
 
 }).prefix('api')

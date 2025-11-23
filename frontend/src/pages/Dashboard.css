@@ -169,12 +169,12 @@
     color: #92400e;
 }
 
-.status-running {
+.status-in-progress {
     background-color: #dbeafe;
     color: #1e40af;
 }
 
-.status-done {
+.status-completed {
     background-color: #d1fae5;
     color: #065f46;
 }

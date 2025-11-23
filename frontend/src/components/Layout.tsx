@@ -1,12 +1,21 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Tag, Lock, Trash2, Package, Shield } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import api from '../api/client';
 import './Layout.css';
+
+interface Stats {
+    promos: number;
+    vault: number;
+    trash: number;
+}
 
 export const Layout = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [stats, setStats] = useState<Stats>({ promos: 0, vault: 0, trash: 0 });
 
     const handleLogout = async () => {
         await logout();
@@ -14,6 +23,24 @@ export const Layout = () => {
     };
 
     const isActive = (path: string) => location.pathname === path;
+
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchStats = async () => {
+            try {
+                const res = await api.get('/stats');
+                setStats(res.data);
+            } catch (error) {
+                console.error('Failed to fetch stats', error);
+            }
+        };
+
+        fetchStats();
+        // Refresh stats every 30 seconds
+        const interval = setInterval(fetchStats, 30000);
+        return () => clearInterval(interval);
+    }, [user]);
 
     return (
         <div className="app-container">
@@ -49,6 +76,7 @@ export const Layout = () => {
                             >
                                 <Tag size={20} className="sidebar-icon" />
                                 <span>Promo Wall</span>
+                                {stats.promos > 0 && <span className="count-badge">{stats.promos}</span>}
                             </Link>
                             <Link
                                 to="/vault"
@@ -56,6 +84,7 @@ export const Layout = () => {
                             >
                                 <Lock size={20} className="sidebar-icon" />
                                 <span>Vault</span>
+                                {stats.vault > 0 && <span className="count-badge">{stats.vault}</span>}
                             </Link>
                             <Link
                                 to="/trash"
@@ -63,6 +92,7 @@ export const Layout = () => {
                             >
                                 <Trash2 size={20} className="sidebar-icon" />
                                 <span>Trash</span>
+                                {stats.trash > 0 && <span className="count-badge">{stats.trash}</span>}
                             </Link>
                             <Link
                                 to="/tracking"

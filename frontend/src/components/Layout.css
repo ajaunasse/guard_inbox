@@ -90,6 +90,22 @@
   flex-shrink: 0;
 }
 
+.count-badge {
+  margin-left: auto;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  background-color: #4f46e5;
+  color: white;
+  border-radius: 9999px;
+  font-weight: 600;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.sidebar-link.active .count-badge {
+  background-color: #6366f1;
+}
+
 .coming-soon-label {
   margin-left: auto;
   font-size: 0.625rem;

@@ -30,7 +30,7 @@ export default class Email extends BaseModel {
   declare snippet: string | null
 
   @column()
-  declare metadata: object | null
+  declare body: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -30,6 +30,68 @@ Built with AdonisJS 6, React 19, and OpenAI GPT-4, Guard Inbox helps you never m
 - ✅ **Promo Code Vault** - Central repository for all your discount codes
 - ✅ **Multi-Account Support** - Connect multiple Gmail accounts
 - ✅ **Secure Token Encryption** - Military-grade encryption for OAuth tokens
+- ✅ **Asynchronous Queue System** - Background job processing with BullMQ + Redis
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 20+
+- Docker & Docker Compose (for PostgreSQL + Redis)
+- Gmail account for OAuth
+- OpenAI API key
+
+### Installation
+
+**1. Start services (PostgreSQL + Redis)**
+
+```bash
+# From project root
+docker-compose up -d
+
+# Verify services are running
+docker-compose ps
+```
+
+**2. Backend setup**
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials (Google OAuth, OpenAI API key)
+
+# Run migrations
+node ace migration:run
+
+# Start backend (queue workers start automatically)
+npm run dev
+```
+
+**3. Frontend setup** *(in another terminal)*
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start frontend
+npm run dev
+```
+
+**4. Access the application**
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3333
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
 
 ---
 
@@ -101,7 +163,7 @@ Built with AdonisJS 6, React 19, and OpenAI GPT-4, Guard Inbox helps you never m
 
 **🟢 Low Priority (Nice to Have):**
 - [ ] **Phase 8.1** - WebSockets for real-time updates
-- [ ] **Phase 9.1** - Background Jobs with Bull/Redis
+- [x] **Phase 9.1** - Background Jobs with BullMQ/Redis ✅
 - [ ] **Phase 10.1** - API Rate Limiting
 - [ ] **Phase 11.1** - Monitoring & Observability
 
@@ -115,10 +177,12 @@ For detailed technical refactoring plan, see [backend/REFACTORING.md](backend/RE
 - **Framework:** AdonisJS 6
 - **Language:** TypeScript
 - **Database:** PostgreSQL 14+
+- **Cache/Queue:** Redis 7+ (BullMQ)
 - **ORM:** Lucid (AdonisJS native)
 - **Authentication:** @adonisjs/auth + @adonisjs/session
 - **Authorization:** @adonisjs/bouncer
 - **Validation:** VineJS
+- **Queue System:** BullMQ + Redis
 - **AI:** OpenAI GPT-4 (Assistants API)
 - **Email:** Google Gmail API
 
@@ -131,6 +195,7 @@ For detailed technical refactoring plan, see [backend/REFACTORING.md](backend/RE
 - **HTTP Client:** Fetch API
 
 ### DevOps
+- **Containerization:** Docker + Docker Compose
 - **Version Control:** Git + GitHub
 - **Code Quality:** ESLint, Prettier
 - **Git Hooks:** Husky + lint-staged

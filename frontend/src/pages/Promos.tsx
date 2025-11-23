@@ -122,21 +122,18 @@ export const Promos = () => {
     return (
         <div className="promos-container">
             <div className="promos-header">
-                <h1>Promo Wall</h1>
-                <p>Latest deals from your inbox</p>
-            </div>
-
-            {/* Filters */}
-            {promos.length > 0 && (
-                <div className="filters-section">
-                    {/* Brand Search */}
-                    <div className="brand-search">
+                <div className="promos-header-left">
+                    <h1>Promo Wall</h1>
+                    <p>Latest deals from your inbox</p>
+                </div>
+                {promos.length > 0 && (
+                    <div className="promos-search">
                         <input
                             type="text"
                             placeholder="Search by brand..."
                             value={searchBrand}
                             onChange={(e) => setSearchBrand(e.target.value)}
-                            className="brand-search-input"
+                            className="promos-search-input"
                         />
                         {searchBrand && (
                             <button
@@ -147,24 +144,28 @@ export const Promos = () => {
                             </button>
                         )}
                     </div>
+                )}
+            </div>
 
-                    {/* Category Filters */}
-                    <div className="category-filters">
-                        {CATEGORIES.map(category => (
-                            <button
-                                key={category}
-                                onClick={() => setSelectedCategory(category)}
-                                className={`category-filter-btn ${selectedCategory === category ? 'active' : ''}`}
-                                style={
-                                    selectedCategory === category && category !== 'All'
-                                        ? { backgroundColor: getCategoryColor(category), color: 'white' }
-                                        : {}
-                                }
-                            >
-                                {category}
-                            </button>
-                        ))}
-                    </div>
+            {/* Category Filters */}
+            {promos.length > 0 && (
+                <div className="category-filters">
+                    {CATEGORIES.map(category => (
+                        <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`category-filter-btn ${selectedCategory === category ? 'active' : ''}`}
+                            style={
+                                selectedCategory === category
+                                    ? category === 'All'
+                                        ? { backgroundColor: '#4f46e5', color: 'white', borderColor: 'transparent' }
+                                        : { backgroundColor: getCategoryColor(category), color: 'white', borderColor: 'transparent' }
+                                    : {}
+                            }
+                        >
+                            {category}
+                        </button>
+                    ))}
                 </div>
             )}
 
