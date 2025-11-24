@@ -75,4 +75,57 @@ export default class GmailMessageFetcher {
       body,
     }
   }
+
+  /**
+   * Move message to trash (soft delete)
+   */
+  async trashMessage(accessToken: string, refreshToken: string | null, messageId: string): Promise<boolean> {
+    try {
+      const auth = this.gmailOAuthService.getClient(accessToken, refreshToken || undefined)
+      const gmail = google.gmail({ version: 'v1', auth })
+
+      await gmail.users.messages.trash({
+        userId: 'me',
+        id: messageId,
+      })
+
+      console.log(`✅ Message ${messageId} moved to trash`)
+      return true
+    } catch (error) {
+      console.error(`Failed to trash message ${messageId}:`, error)
+      return false
+    }
+  }
+
+  /**
+   * Batch trash multiple messages (more efficient)
+   */
+  async batchTrashMessages(accessToken: string, refreshToken: string | null, messageIds: string[]): Promise<number> {
+    if (messageIds.length === 0) return 0
+
+    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken || undefined)
+    const gmail = google.gmail({ version: 'v1', auth })
+
+    let trashedCount = 0
+
+    // Gmail API doesn't have a batch trash endpoint, so we do it in parallel
+    const promises = messageIds.map(async (messageId) => {
+      try {
+        await gmail.users.messages.trash({
+          userId: 'me',
+          id: messageId,
+        })
+        trashedCount++
+        return true
+      } catch (error) {
+        console.error(`Failed to trash message ${messageId}:`, error)
+        return false
+      }
+    })
+
+    await Promise.all(promises)
+
+    console.log(`✅ Trashed ${trashedCount}/${messageIds.length} messages`)
+    return trashedCount
+  }
 }

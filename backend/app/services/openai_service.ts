@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import env from '#start/env'
+import ExternalApiException from '#exceptions/external_api_exception'
 
 export interface PromoDetails {
     code: string | null
@@ -33,11 +34,15 @@ export default class OpenAIService {
             const assistantId = env.get('OPENAI_ASSISTANT_ID')
 
             if (!assistantId) {
-                throw new Error('OPENAI_ASSISTANT_ID is required')
+                throw ExternalApiException.openaiApiFailed('OPENAI_ASSISTANT_ID is not configured')
             }
 
             return this.extractWithAssistant(assistantId, subject, sender, body)
         } catch (error) {
+            if (error instanceof ExternalApiException) {
+                throw error
+            }
+
             console.error('OpenAI extraction failed:', error)
             return null
         }
@@ -62,58 +67,73 @@ ${body}
     }
 
     private async extractWithAssistant(assistantId: string, subject: string, sender: string, body: string): Promise<PromoDetails | null> {
-        // Create a thread and run the assistant
-        const run = await this.client.beta.threads.createAndRun({
-            assistant_id: assistantId,
-            thread: {
-                messages: [
-                    { role: 'user', content: this.formatUserMessage(subject, sender, body) }
-                ]
+        try {
+            // Create a thread and run the assistant
+            const run = await this.client.beta.threads.createAndRun({
+                assistant_id: assistantId,
+                thread: {
+                    messages: [
+                        { role: 'user', content: this.formatUserMessage(subject, sender, body) }
+                    ]
+                }
+            })
+
+            console.log('Run created:', run.id, 'Thread:', run.thread_id)
+
+            if (!run.thread_id) {
+                console.error('No thread_id in run response:', run)
+                throw ExternalApiException.openaiApiFailed('Failed to create thread')
             }
-        })
 
-        console.log('Run created:', run.id, 'Thread:', run.thread_id)
+            const threadId = run.thread_id
 
-        if (!run.thread_id) {
-            console.error('No thread_id in run response:', run)
-            throw new Error('Failed to create thread')
-        }
+            // Poll for completion
+            let runStatus = await this.client.beta.threads.runs.retrieve(run.id, { thread_id: threadId })
 
-        const threadId = run.thread_id
+            // Simple polling mechanism (max 30 seconds)
+            const startTime = Date.now()
+            while (runStatus.status !== 'completed') {
+                if (['failed', 'cancelled', 'expired'].includes(runStatus.status)) {
+                    console.error(`Assistant run failed with status: ${runStatus.status}`)
+                    throw ExternalApiException.openaiApiFailed(`Assistant run failed with status: ${runStatus.status}`)
+                }
 
-        // Poll for completion
-        let runStatus = await this.client.beta.threads.runs.retrieve(run.id, { thread_id: threadId })
+                if (Date.now() - startTime > 30000) {
+                    console.error('Assistant run timed out')
+                    throw ExternalApiException.openaiTimeout()
+                }
 
-        // Simple polling mechanism (max 30 seconds)
-        const startTime = Date.now()
-        while (runStatus.status !== 'completed') {
-            if (['failed', 'cancelled', 'expired'].includes(runStatus.status)) {
-                console.error(`Assistant run failed with status: ${runStatus.status}`)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                runStatus = await this.client.beta.threads.runs.retrieve(run.id, { thread_id: threadId })
+            }
+
+            // Get messages
+            const messages = await this.client.beta.threads.messages.list(threadId)
+            const lastMessage = messages.data.find(m => m.role === 'assistant')
+
+            if (!lastMessage || !lastMessage.content[0] || lastMessage.content[0].type !== 'text') {
                 return null
             }
 
-            if (Date.now() - startTime > 30000) {
-                console.error('Assistant run timed out')
-                return null
+            const content = lastMessage.content[0].text.value
+
+            // Clean up markdown code blocks if present
+            const jsonStr = content.replace(/^```json\n|\n```$/g, '')
+
+            return JSON.parse(jsonStr) as PromoDetails
+        } catch (error) {
+            // Re-throw if it's already our custom exception
+            if (error instanceof ExternalApiException) {
+                throw error
             }
 
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            runStatus = await this.client.beta.threads.runs.retrieve(run.id, { thread_id: threadId })
+            // Handle OpenAI rate limiting
+            if (error.status === 429) {
+                const retryAfter = error.headers?.['retry-after']
+                throw ExternalApiException.rateLimitExceeded('OpenAI', retryAfter)
+            }
+
+            throw ExternalApiException.openaiApiFailed(error.message || 'Unknown error')
         }
-
-        // Get messages
-        const messages = await this.client.beta.threads.messages.list(threadId)
-        const lastMessage = messages.data.find(m => m.role === 'assistant')
-
-        if (!lastMessage || !lastMessage.content[0] || lastMessage.content[0].type !== 'text') {
-            return null
-        }
-
-        const content = lastMessage.content[0].text.value
-
-        // Clean up markdown code blocks if present
-        const jsonStr = content.replace(/^```json\n|\n```$/g, '')
-
-        return JSON.parse(jsonStr) as PromoDetails
     }
 }

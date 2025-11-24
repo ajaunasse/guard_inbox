@@ -52,7 +52,8 @@ export default defineConfig({
     {
       file: () => import('#providers/queue_provider'),
       environment: ['web'],
-    }
+    },
+    () => import('@adonisjs/limiter/limiter_provider')
   ],
 
   /*

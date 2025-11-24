@@ -37,6 +37,15 @@ export default class EmailAccount extends BaseModel {
   @column.dateTime()
   declare tokenExpiry: DateTime | null
 
+  @column()
+  declare autoDeleteEmails: boolean
+
+  @column()
+  declare autoScanEnabled: boolean
+
+  @column.dateTime()
+  declare lastAutoScanAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

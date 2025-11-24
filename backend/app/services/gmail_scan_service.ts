@@ -18,6 +18,29 @@ export default class GmailScanService {
    * Scan recent emails for promotions
    */
   async scan(emailAccount: EmailAccount) {
+    // Check if token is expired and refresh if needed
+    if (this.gmailOAuthService.isTokenExpired(emailAccount.tokenExpiry?.toJSDate() || null)) {
+      console.log(`Access token expired for account ${emailAccount.id}, refreshing...`)
+
+      if (!emailAccount.refreshToken) {
+        console.error(`No refresh token available for account ${emailAccount.id}`)
+        throw new Error('OAuth token expired and no refresh token available. Please reconnect your account.')
+      }
+
+      const { accessToken, expiryDate } = await this.gmailOAuthService.refreshAccessToken(
+        emailAccount.refreshToken
+      )
+
+      // Update email account with new token
+      emailAccount.accessToken = accessToken
+      if (expiryDate) {
+        emailAccount.tokenExpiry = DateTime.fromMillis(expiryDate)
+      }
+      await emailAccount.save()
+
+      console.log(`Access token refreshed for account ${emailAccount.id}`)
+    }
+
     const auth = this.gmailOAuthService.getClient(
       emailAccount.accessToken,
       emailAccount.refreshToken

@@ -5,6 +5,8 @@ import env from '#start/env'
 import { inject } from '@adonisjs/core'
 import { registerValidator } from '#validators/register_validator'
 import { loginValidator } from '#validators/login_validator'
+import { randomBytes } from 'node:crypto'
+import OAuthException from '#exceptions/oauth_exception'
 
 @inject()
 export default class AuthController {
@@ -18,22 +20,34 @@ export default class AuthController {
     async googleCallback({ request, response, auth }: HttpContext) {
         const code = request.input('code')
 
+        if (!code) {
+            throw OAuthException.missingCode()
+        }
+
         try {
             const tokens = await this.gmailOAuthService.getTokens(code, env.get('GOOGLE_LOGIN_REDIRECT_URI'))
-            const googleUser = await this.gmailOAuthService.getUserInfo(tokens.access_token!)
+
+            if (!tokens.access_token) {
+                throw OAuthException.tokenExchangeFailed('No access token returned')
+            }
+
+            const googleUser = await this.gmailOAuthService.getUserInfo(tokens.access_token)
 
             if (!googleUser.email) {
-                return response.badRequest('No email returned from Google')
+                throw OAuthException.userInfoFailed()
             }
 
             // Find or create user
             let user = await User.findBy('email', googleUser.email)
 
             if (!user) {
+                // Generate cryptographically secure random password
+                const randomPassword = randomBytes(32).toString('hex')
+
                 user = await User.create({
                     email: googleUser.email,
                     fullName: googleUser.name,
-                    password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8), // Random password
+                    password: randomPassword,
                 })
             }
 
@@ -41,12 +55,17 @@ export default class AuthController {
             await auth.use('web').login(user)
 
             // Redirect to frontend dashboard
-            // In production, this should be an env var for frontend URL
-            return response.redirect('http://localhost:5173/dashboard')
+            const frontendUrl = env.get('FRONTEND_URL')
+            return response.redirect(`${frontendUrl}/dashboard`)
 
         } catch (error) {
+            // Re-throw if it's already our custom exception
+            if (error instanceof OAuthException) {
+                throw error
+            }
+
             console.error('Google Login Error:', error)
-            return response.badRequest('Google Login Failed')
+            throw OAuthException.tokenExchangeFailed(error.message || 'Unknown error')
         }
     }
 

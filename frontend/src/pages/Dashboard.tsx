@@ -8,6 +8,8 @@ interface EmailAccount {
     id: number;
     googleUserId: string;
     email: string | null;
+    autoDeleteEmails: boolean;
+    autoScanEnabled: boolean;
     createdAt: string;
 }
 
@@ -23,6 +25,7 @@ export const Dashboard = () => {
     const [jobs, setJobs] = useState<ScanJob[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState<{ accountId: number; setting: 'autoDelete' } | null>(null);
 
     const fetchData = async () => {
         try {
@@ -75,6 +78,38 @@ export const Dashboard = () => {
         }
     };
 
+    const handleToggleAutoDelete = async (accountId: number, currentValue: boolean) => {
+        // Show confirmation dialog when enabling auto-delete
+        if (!currentValue) {
+            setShowConfirmDialog({ accountId, setting: 'autoDelete' });
+            return;
+        }
+
+        // Disable without confirmation
+        await updateAccountSettings(accountId, { autoDeleteEmails: false });
+    };
+
+    const confirmAutoDelete = async () => {
+        if (!showConfirmDialog) return;
+        await updateAccountSettings(showConfirmDialog.accountId, { autoDeleteEmails: true });
+        setShowConfirmDialog(null);
+    };
+
+    const handleToggleAutoScan = async (accountId: number, currentValue: boolean) => {
+        await updateAccountSettings(accountId, { autoScanEnabled: !currentValue });
+    };
+
+    const updateAccountSettings = async (accountId: number, settings: { autoDeleteEmails?: boolean; autoScanEnabled?: boolean }) => {
+        try {
+            await api.patch(`/email-accounts/${accountId}/settings`, settings);
+            fetchData();
+            setToast({ message: 'Settings updated successfully', type: 'success' });
+        } catch (error) {
+            console.error('Failed to update settings', error);
+            setToast({ message: 'Failed to update settings. Please try again.', type: 'error' });
+        }
+    };
+
     if (isLoading) return <div>Loading dashboard...</div>;
 
     return (
@@ -86,6 +121,40 @@ export const Dashboard = () => {
                     onClose={() => setToast(null)}
                 />
             )}
+
+            {showConfirmDialog && (
+                <div className="modal-overlay" onClick={() => setShowConfirmDialog(null)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2>⚠️ Enable Auto-Delete?</h2>
+                        <p>Scanned emails will be moved to your Gmail Trash after each scan.</p>
+
+                        <div className="confirm-details">
+                            <p><strong>✅ What we'll do:</strong></p>
+                            <ul>
+                                <li>All promo codes are saved in Guard Inbox (Promo Wall or Vault)</li>
+                                <li>Emails in Trash stay for 30 days before permanent deletion</li>
+                                <li>You can restore emails from Gmail Trash anytime</li>
+                            </ul>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button
+                                onClick={() => setShowConfirmDialog(null)}
+                                className="btn btn-secondary"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmAutoDelete}
+                                className="btn btn-primary"
+                            >
+                                Enable Auto-Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="dashboard-container">
             <div className="dashboard-header">
                 <h1>Dashboard</h1>
@@ -114,6 +183,39 @@ export const Dashboard = () => {
                                         )}
                                     </div>
                                 </div>
+
+                                <div className="account-settings">
+                                    <div className="setting-item">
+                                        <div className="setting-info">
+                                            <span className="setting-label">🗑️ Auto-delete after scan</span>
+                                            <span className="setting-description">Move emails to trash after scanning</span>
+                                        </div>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={account.autoDeleteEmails}
+                                                onChange={() => handleToggleAutoDelete(account.id, account.autoDeleteEmails)}
+                                            />
+                                            <span className="toggle-slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <div className="setting-item">
+                                        <div className="setting-info">
+                                            <span className="setting-label">🤖 Auto-scan hourly</span>
+                                            <span className="setting-description">Automatically scan for new emails</span>
+                                        </div>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={account.autoScanEnabled}
+                                                onChange={() => handleToggleAutoScan(account.id, account.autoScanEnabled)}
+                                            />
+                                            <span className="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div className="account-actions">
                                     <button
                                         onClick={() => handleScan(account.id)}

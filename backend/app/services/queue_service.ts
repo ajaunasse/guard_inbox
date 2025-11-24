@@ -11,18 +11,52 @@ import PromoCodeRepository from '#repositories/promo_code_repository'
 import EmailAccount from '#models/email_account'
 import ScanJob from '#models/scan_job'
 
-// Redis connection
-const connection = new Redis({
-  host: queueConfig.redis.host,
-  port: queueConfig.redis.port,
-  password: queueConfig.redis.password,
-  maxRetriesPerRequest: null,
-})
+// Redis connection (lazy initialization)
+let connection: Redis | null = null
 
-// Email scan queue
-export const emailScanQueue = new Queue(queueConfig.queues.emailScan.name, {
-  connection,
-})
+function getRedisConnection() {
+  if (!connection) {
+    connection = new Redis({
+      host: queueConfig.redis.host,
+      port: queueConfig.redis.port,
+      password: queueConfig.redis.password,
+      maxRetriesPerRequest: null,
+      // Add retry strategy
+      retryStrategy: (times) => {
+        if (times > 10) {
+          console.error('Redis connection failed after 10 retries')
+          return null
+        }
+        const delay = Math.min(times * 50, 2000)
+        console.log(`Retrying Redis connection in ${delay}ms...`)
+        return delay
+      },
+    })
+
+    connection.on('error', (error) => {
+      console.error('Redis connection error:', error.message)
+    })
+
+    connection.on('connect', () => {
+      console.log('✅ Redis connected successfully')
+    })
+  }
+  return connection
+}
+
+// Email scan queue (lazy initialization)
+let emailScanQueueInstance: Queue | null = null
+
+export function getEmailScanQueue() {
+  if (!emailScanQueueInstance) {
+    emailScanQueueInstance = new Queue(queueConfig.queues.emailScan.name, {
+      connection: getRedisConnection(),
+    })
+  }
+  return emailScanQueueInstance
+}
+
+export const emailScanQueue = getEmailScanQueue()
 
 // Job data interface
 interface EmailScanJobData {
@@ -95,7 +129,7 @@ export function startEmailScanWorker() {
       }
     },
     {
-      connection,
+      connection: getRedisConnection(),
       concurrency: queueConfig.queues.emailScan.concurrency,
       removeOnComplete: { count: 100 }, // Keep last 100 completed jobs
       removeOnFail: { count: 50 }, // Keep last 50 failed jobs
@@ -125,7 +159,8 @@ export function stopEmailScanWorker() {
 
 // Add a job to the queue
 export async function addEmailScanJob(scanJobId: number, emailAccountId: number) {
-  const job = await emailScanQueue.add(
+  const queue = getEmailScanQueue()
+  const job = await queue.add(
     'scan',
     {
       scanJobId,
@@ -144,7 +179,8 @@ export async function addEmailScanJob(scanJobId: number, emailAccountId: number)
 
 // Get queue stats
 export async function getQueueStats() {
-  const counts = await emailScanQueue.getJobCounts()
+  const queue = getEmailScanQueue()
+  const counts = await queue.getJobCounts()
   return {
     waiting: counts.waiting,
     active: counts.active,
