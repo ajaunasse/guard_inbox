@@ -18,11 +18,27 @@
   z-index: 10;
 }
 
+.logo {
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
 .logo a {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #4f46e5;
+  display: flex;
+  align-items: center;
   text-decoration: none;
+  height: 100%;
+}
+
+.logo-img {
+  height: 150px;
+  width: auto;
+  object-fit: contain;
+  max-width: 500px;
+  position: relative;
+  top: 0;
 }
 
 .header-nav {
@@ -35,11 +51,18 @@
   color: #4b5563;
   text-decoration: none;
   font-weight: 500;
+  font-size: 1.125rem;
   transition: color 0.2s;
 }
 
 .header-nav a:hover {
   color: #111827;
+}
+
+.header-nav .btn {
+  font-size: 1.125rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
 }
 
 .app-layout {
@@ -154,6 +177,28 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .logo-img {
+    height: 40px;
+    max-width: 150px;
+  }
+
+  .header-nav {
+    gap: 1rem;
+  }
+
+  .header-nav a {
+    font-size: 0.875rem;
+  }
+
+  .header-nav .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+
   .sidebar {
     width: 200px;
   }
@@ -162,7 +207,6 @@
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
   }
-
 
   .app-content {
     padding: 1rem;

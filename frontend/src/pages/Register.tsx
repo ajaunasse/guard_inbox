@@ -26,7 +26,7 @@ export const Register = () => {
         <div className="auth-container">
             <div className="auth-card">
                 <h1>Create Account</h1>
-                <p className="auth-subtitle">Start saving with GuardInbox</p>
+                <p className="auth-subtitle">Start saving with CleanBox</p>
 
                 {error && <div className="auth-error">{error}</div>}
 

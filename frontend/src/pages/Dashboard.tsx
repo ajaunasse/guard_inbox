@@ -131,7 +131,7 @@ export const Dashboard = () => {
                         <div className="confirm-details">
                             <p><strong>✅ What we'll do:</strong></p>
                             <ul>
-                                <li>All promo codes are saved in Guard Inbox (Promo Wall or Vault)</li>
+                                <li>All promo codes are saved in CleanBox (Promo Wall or Vault)</li>
                                 <li>Emails in Trash stay for 30 days before permanent deletion</li>
                                 <li>You can restore emails from Gmail Trash anytime</li>
                             </ul>
