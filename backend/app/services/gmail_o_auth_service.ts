@@ -89,7 +89,7 @@ export default class GmailOAuthService {
    * Get a valid OAuth2 client with credentials set
    * Automatically refreshes tokens if expired
    */
-  getClient(accessToken: string, refreshToken: string | null) {
+  getClient(accessToken: string, refreshToken?: string | null) {
     const client = new google.auth.OAuth2(
       env.get('GOOGLE_CLIENT_ID'),
       env.get('GOOGLE_CLIENT_SECRET'),
@@ -98,7 +98,7 @@ export default class GmailOAuthService {
 
     client.setCredentials({
       access_token: accessToken,
-      refresh_token: refreshToken,
+      refresh_token: refreshToken ?? null,
     })
 
     // Set up automatic token refresh

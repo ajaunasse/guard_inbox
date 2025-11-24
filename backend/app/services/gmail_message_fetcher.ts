@@ -19,8 +19,12 @@ export default class GmailMessageFetcher {
   /**
    * Fetch messages from Gmail for a given account
    */
-  async fetchMessages(accessToken: string, refreshToken: string | null, maxResults: number = 50): Promise<{ id: string }[]> {
-    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken || undefined)
+  async fetchMessages(
+    accessToken: string,
+    refreshToken: string | null,
+    maxResults: number = 50
+  ): Promise<{ id: string }[]> {
+    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken ?? undefined)
     const gmail = google.gmail({ version: 'v1', auth })
 
     const res = await gmail.users.messages.list({
@@ -29,14 +33,19 @@ export default class GmailMessageFetcher {
       q: 'category:promotions newer_than:30d',
     })
 
-    return res.data.messages || []
+    const messages = res.data.messages || []
+    return messages.filter((m): m is { id: string } => !!m.id)
   }
 
   /**
    * Get full message details from Gmail
    */
-  async getMessage(accessToken: string, refreshToken: string | null, messageId: string): Promise<GmailMessage | null> {
-    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken || undefined)
+  async getMessage(
+    accessToken: string,
+    refreshToken: string | null,
+    messageId: string
+  ): Promise<GmailMessage | null> {
+    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken ?? undefined)
     const gmail = google.gmail({ version: 'v1', auth })
 
     const fullMsg = await gmail.users.messages.get({
@@ -59,7 +68,9 @@ export default class GmailMessageFetcher {
     if (payload?.body?.data) {
       body = Buffer.from(payload.body.data, 'base64').toString('utf-8')
     } else if (payload?.parts) {
-      const part = payload.parts.find((p) => p.mimeType === 'text/plain') || payload.parts.find((p) => p.mimeType === 'text/html')
+      const part =
+        payload.parts.find((p) => p.mimeType === 'text/plain') ||
+        payload.parts.find((p) => p.mimeType === 'text/html')
       if (part?.body?.data) {
         body = Buffer.from(part.body.data, 'base64').toString('utf-8')
       }
@@ -79,9 +90,13 @@ export default class GmailMessageFetcher {
   /**
    * Move message to trash (soft delete)
    */
-  async trashMessage(accessToken: string, refreshToken: string | null, messageId: string): Promise<boolean> {
+  async trashMessage(
+    accessToken: string,
+    refreshToken: string | null,
+    messageId: string
+  ): Promise<boolean> {
     try {
-      const auth = this.gmailOAuthService.getClient(accessToken, refreshToken || undefined)
+      const auth = this.gmailOAuthService.getClient(accessToken, refreshToken ?? undefined)
       const gmail = google.gmail({ version: 'v1', auth })
 
       await gmail.users.messages.trash({
@@ -100,10 +115,14 @@ export default class GmailMessageFetcher {
   /**
    * Batch trash multiple messages (more efficient)
    */
-  async batchTrashMessages(accessToken: string, refreshToken: string | null, messageIds: string[]): Promise<number> {
+  async batchTrashMessages(
+    accessToken: string,
+    refreshToken: string | null,
+    messageIds: string[]
+  ): Promise<number> {
     if (messageIds.length === 0) return 0
 
-    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken || undefined)
+    const auth = this.gmailOAuthService.getClient(accessToken, refreshToken ?? undefined)
     const gmail = google.gmail({ version: 'v1', auth })
 
     let trashedCount = 0

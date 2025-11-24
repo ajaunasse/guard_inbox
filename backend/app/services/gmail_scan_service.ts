@@ -12,7 +12,7 @@ export default class GmailScanService {
   constructor(
     protected gmailOAuthService: GmailOAuthService,
     protected promoExtractionService: PromoExtractionService
-  ) { }
+  ) {}
 
   /**
    * Scan recent emails for promotions
@@ -24,7 +24,9 @@ export default class GmailScanService {
 
       if (!emailAccount.refreshToken) {
         console.error(`No refresh token available for account ${emailAccount.id}`)
-        throw new Error('OAuth token expired and no refresh token available. Please reconnect your account.')
+        throw new Error(
+          'OAuth token expired and no refresh token available. Please reconnect your account.'
+        )
       }
 
       const { accessToken, expiryDate } = await this.gmailOAuthService.refreshAccessToken(
@@ -79,10 +81,10 @@ export default class GmailScanService {
         const payload = fullMsg.data.payload
         const headers = payload?.headers || []
 
-        const subject = headers.find(h => h.name === 'Subject')?.value || ''
-        const from = headers.find(h => h.name === 'From')?.value || ''
-        const to = headers.find(h => h.name === 'To')?.value || ''
-        const dateStr = headers.find(h => h.name === 'Date')?.value
+        const subject = headers.find((h) => h.name === 'Subject')?.value || ''
+        const from = headers.find((h) => h.name === 'From')?.value || ''
+        const to = headers.find((h) => h.name === 'To')?.value || ''
+        const dateStr = headers.find((h) => h.name === 'Date')?.value
         const sentAt = dateStr ? DateTime.fromRFC2822(dateStr) : null
         const snippet = fullMsg.data.snippet || ''
 
@@ -92,7 +94,9 @@ export default class GmailScanService {
           body = Buffer.from(payload.body.data, 'base64').toString('utf-8')
         } else if (payload?.parts) {
           // Try to find text/plain or text/html
-          const part = payload.parts.find(p => p.mimeType === 'text/plain') || payload.parts.find(p => p.mimeType === 'text/html')
+          const part =
+            payload.parts.find((p) => p.mimeType === 'text/plain') ||
+            payload.parts.find((p) => p.mimeType === 'text/html')
           if (part?.body?.data) {
             body = Buffer.from(part.body.data, 'base64').toString('utf-8')
           }
@@ -107,7 +111,6 @@ export default class GmailScanService {
           to,
           sentAt,
           snippet,
-          metadata: { headers: headers }, // Store raw headers just in case
         })
 
         // 4. Extract promo details
@@ -149,7 +152,6 @@ export default class GmailScanService {
         }
 
         processedCount++
-
       } catch (error) {
         console.error(`Failed to process message ${msg.id}`, error)
       }

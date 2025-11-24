@@ -12,9 +12,6 @@
 |
 */
 
-import Email from '#models/email'
-import EmailAccount from '#models/email_account'
-import ScanJob from '#models/scan_job'
 import EmailPolicy from '#policies/email_policy'
 import EmailAccountPolicy from '#policies/email_account_policy'
 import ScanJobPolicy from '#policies/scan_job_policy'
@@ -23,11 +20,4 @@ export const policies = {
   EmailPolicy: EmailPolicy,
   EmailAccountPolicy: EmailAccountPolicy,
   ScanJobPolicy: ScanJobPolicy,
-}
-
-// Type mapping for better type inference
-export const policyModels = {
-  Email: EmailPolicy,
-  EmailAccount: EmailAccountPolicy,
-  ScanJob: ScanJobPolicy,
 }

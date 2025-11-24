@@ -159,11 +159,11 @@ export default {
   queues: {
     emailScan: {
       name: 'email-scan',
-      concurrency: 5,        // Process 5 jobs at once
-      attempts: 3,           // Retry failed jobs 3 times
+      concurrency: 5, // Process 5 jobs at once
+      attempts: 3, // Retry failed jobs 3 times
       backoff: {
         type: 'exponential',
-        delay: 5000,         // 5s → 10s → 20s
+        delay: 5000, // 5s → 10s → 20s
       },
     },
   },
@@ -175,7 +175,7 @@ export default {
 For better performance, increase concurrency:
 
 ```typescript
-concurrency: 10  // Process 10 scans simultaneously
+concurrency: 10 // Process 10 scans simultaneously
 ```
 
 ⚠️ **Warning:** Higher concurrency means more API calls to Gmail/OpenAI. Consider rate limits!
@@ -271,6 +271,7 @@ LIMIT 10;
 ```
 
 Common errors:
+
 - **OAuth token expired**: User needs to reconnect Gmail account
 - **OpenAI rate limit**: Reduce concurrency or add delay
 - **Network timeout**: Increase timeout in Gmail service
@@ -314,7 +315,7 @@ For urgent scans (e.g., manual user trigger), add priority:
 
 ```typescript
 await emailScanQueue.add('scan', data, {
-  priority: 1,  // Higher priority (lower number = higher priority)
+  priority: 1, // Higher priority (lower number = higher priority)
   attempts: 3,
 })
 ```

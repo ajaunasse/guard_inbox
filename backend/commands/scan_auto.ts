@@ -18,9 +18,7 @@ export default class ScanAuto extends BaseCommand {
 
     try {
       // Find all email accounts with auto-scan enabled
-      const accounts = await EmailAccount.query()
-        .where('autoScanEnabled', true)
-        .preload('user')
+      const accounts = await EmailAccount.query().where('autoScanEnabled', true).preload('user')
 
       this.logger.info(`Found ${accounts.length} accounts with auto-scan enabled`)
 

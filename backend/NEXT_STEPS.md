@@ -38,10 +38,10 @@ import encryption from '@adonisjs/core/services/encryption'
 
 export default class MigrateTokens extends BaseCommand {
   static commandName = 'migrate:tokens'
-  
+
   async run() {
     const accounts = await EmailAccount.all()
-    
+
     for (const account of accounts) {
       // Force re-save to trigger encryption
       account.accessToken = account.accessToken
@@ -50,7 +50,7 @@ export default class MigrateTokens extends BaseCommand {
       }
       await account.save()
     }
-    
+
     this.logger.success('Tokens migrated successfully')
   }
 }
@@ -79,6 +79,7 @@ mv app/services/gmail_scan_service_v2.ts app/services/gmail_scan_service.ts
 **Objectif**: Éliminer les valeurs hardcodées
 
 **Fichiers à créer:**
+
 ```typescript
 // config/services.ts (déjà créé)
 import env from '#start/env'
@@ -103,6 +104,7 @@ export default {
 ```
 
 **Fichiers à modifier:**
+
 - `app/controllers/auth_controller.ts` - Utiliser `config.frontend.url`
 - `app/services/gmail_o_auth_service.ts` - Utiliser `config.oauth.google`
 - `app/controllers/email_accounts_controller.ts` - Utiliser config
@@ -114,6 +116,7 @@ export default {
 **Objectif**: Sortir la logique utilisateur des controllers
 
 **Fichier à créer:**
+
 ```typescript
 // app/services/user_service.ts
 import User from '#models/user'
@@ -141,10 +144,7 @@ export default class UserService {
   /**
    * Create user from credentials
    */
-  async createFromCredentials(
-    email: string,
-    password: string
-  ): Promise<User> {
+  async createFromCredentials(email: string, password: string): Promise<User> {
     return User.create({
       email,
       password: await hash.make(password),
@@ -154,10 +154,7 @@ export default class UserService {
   /**
    * Verify user credentials
    */
-  async verifyCredentials(
-    email: string,
-    password: string
-  ): Promise<User | null> {
+  async verifyCredentials(email: string, password: string): Promise<User | null> {
     const user = await User.findBy('email', email)
     if (!user) return null
 
@@ -168,6 +165,7 @@ export default class UserService {
 ```
 
 **Fichier à modifier:**
+
 - `app/controllers/auth_controller.ts` - Utiliser `UserService`
 
 ---
@@ -204,6 +202,7 @@ export default class PromoExtractionException extends Exception {
 ```
 
 **Utilisation:**
+
 ```typescript
 // Dans les services
 if (!assistantId) {
@@ -218,22 +217,27 @@ if (!assistantId) {
 **Objectif**: Valider les inputs utilisateur
 
 **Installation:**
+
 ```bash
 npm install @vinejs/vine
 node ace configure @vinejs/vine
 ```
 
 **Fichiers à créer:**
+
 ```typescript
 // app/validators/register_validator.ts
 import vine from '@vinejs/vine'
 
 export const registerValidator = vine.compile(
   vine.object({
-    email: vine.string().email().unique(async (db, value) => {
-      const user = await db.from('users').where('email', value).first()
-      return !user
-    }),
+    email: vine
+      .string()
+      .email()
+      .unique(async (db, value) => {
+        const user = await db.from('users').where('email', value).first()
+        return !user
+      }),
     password: vine.string().minLength(8),
   })
 )
@@ -247,6 +251,7 @@ export const createScanValidator = vine.compile(
 ```
 
 **Utilisation dans controllers:**
+
 ```typescript
 async register({ request, response }: HttpContext) {
   const data = await request.validateUsing(registerValidator)
@@ -261,6 +266,7 @@ async register({ request, response }: HttpContext) {
 **Objectif**: Sécuriser l'accès aux ressources
 
 **Fichiers à créer:**
+
 ```typescript
 // app/policies/email_policy.ts
 import User from '#models/user'
@@ -287,16 +293,16 @@ export default class EmailAccountPolicy {
 ```
 
 **Configuration:**
+
 ```typescript
 // start/kernel.ts
 import router from '@adonisjs/core/services/router'
 
-router.use([
-  () => import('@adonisjs/bouncer/bouncer_middleware'),
-])
+router.use([() => import('@adonisjs/bouncer/bouncer_middleware')])
 ```
 
 **Utilisation:**
+
 ```typescript
 // Dans controllers
 import { bounce } from '@adonisjs/bouncer'
@@ -315,12 +321,14 @@ async show({ params, bouncer }: HttpContext) {
 **Objectif**: Garantir la qualité du code
 
 **Installation:**
+
 ```bash
 npm install -D @japa/runner @japa/assert @japa/api-client
 node ace configure @japa/runner
 ```
 
 **Fichiers à créer:**
+
 ```typescript
 // tests/unit/repositories/email_repository.spec.ts
 import { test } from '@japa/runner'
@@ -356,26 +364,28 @@ test.group('EmailRepository', () => {
 
 ## 📊 Priorités par Impact
 
-| Phase | Impact | Effort | Priorité |
-|-------|--------|--------|----------|
-| Phase 4.2 (Validators) | 🔴 Élevé | 🟡 Moyen | **1** |
-| Phase 4.3 (Policies) | 🔴 Élevé | 🟡 Moyen | **2** |
-| Phase 1.3 (UserService) | 🟢 Moyen | 🟢 Faible | **3** |
-| Phase 1.2 (Config) | 🟢 Moyen | 🟢 Faible | **4** |
-| Phase 5.1 (Tests) | 🟡 Moyen | 🔴 Élevé | **5** |
-| Phase 1.4 (Exceptions) | 🟡 Faible | 🟢 Faible | **6** |
+| Phase                   | Impact    | Effort    | Priorité |
+| ----------------------- | --------- | --------- | -------- |
+| Phase 4.2 (Validators)  | 🔴 Élevé  | 🟡 Moyen  | **1**    |
+| Phase 4.3 (Policies)    | 🔴 Élevé  | 🟡 Moyen  | **2**    |
+| Phase 1.3 (UserService) | 🟢 Moyen  | 🟢 Faible | **3**    |
+| Phase 1.2 (Config)      | 🟢 Moyen  | 🟢 Faible | **4**    |
+| Phase 5.1 (Tests)       | 🟡 Moyen  | 🔴 Élevé  | **5**    |
+| Phase 1.4 (Exceptions)  | 🟡 Faible | 🟢 Faible | **6**    |
 
 ---
 
 ## 🎓 Ressources Utiles
 
 ### AdonisJS Documentation:
+
 - [Validation with VineJS](https://docs.adonisjs.com/guides/validation)
 - [Authorization with Bouncer](https://docs.adonisjs.com/guides/authorization)
 - [Testing](https://docs.adonisjs.com/guides/testing)
 - [Dependency Injection](https://docs.adonisjs.com/guides/dependency-injection)
 
 ### Patterns:
+
 - [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
 - [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
@@ -385,15 +395,17 @@ test.group('EmailRepository', () => {
 ## ✅ Quick Wins Immédiatement Disponibles
 
 1. **Utiliser les scopes partout**
+
    ```typescript
    // Au lieu de:
-   Email.query().whereHas('emailAccount', q => q.where('userId', userId))
-   
+   Email.query().whereHas('emailAccount', (q) => q.where('userId', userId))
+
    // Utiliser:
-   Email.query().apply(scopes => scopes.forUser(userId))
+   Email.query().apply((scopes) => scopes.forUser(userId))
    ```
 
 2. **Utiliser les repositories dans les nouveaux endpoints**
+
    ```typescript
    // Dans un nouveau controller:
    constructor(protected emailRepository: EmailRepository) {}

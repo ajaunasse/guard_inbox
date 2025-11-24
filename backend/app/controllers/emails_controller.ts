@@ -5,18 +5,18 @@ import { inject } from '@adonisjs/core'
 
 @inject()
 export default class EmailsController {
-    constructor(protected emailRepository: EmailRepository) {}
+  constructor(protected emailRepository: EmailRepository) {}
 
-    async trash({ auth, request, response, bouncer }: HttpContext) {
-        const user = auth.user!
-        await bouncer.with(EmailPolicy).authorize('viewAny')
+  async trash({ auth, request, response, bouncer }: HttpContext) {
+    const user = auth.user!
+    await bouncer.with(EmailPolicy).authorize('viewAny')
 
-        const page = request.input('page', 1)
-        const limit = 50
+    const page = request.input('page', 1)
+    const limit = 50
 
-        // Get emails without promo codes using repository
-        const emails = await this.emailRepository.findWithoutPromoCodesForUser(user.id, page, limit)
+    // Get emails without promo codes using repository
+    const emails = await this.emailRepository.findWithoutPromoCodesForUser(user.id, page, limit)
 
-        return response.ok(emails)
-    }
+    return response.ok(emails)
+  }
 }

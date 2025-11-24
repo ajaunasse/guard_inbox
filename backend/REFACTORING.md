@@ -10,15 +10,16 @@
 
 ### ✅ Phases Complétées (Option B - Priorités Critiques)
 
-| Phase | Description | Impact | Fichiers Modifiés |
-|-------|-------------|--------|-------------------|
-| **1.1** | Model Scopes | 🟢 Élevé | `email.ts`, `promo_code.ts`, controllers |
-| **4.1** | Token Encryption | 🔴 Critique | `email_account.ts` |
-| **2.1** | Architecture en Couches | 🟢 Élevé | 7+ nouveaux fichiers |
-| **4.2** | Input Validation | 🔴 Critique | 3 validators, 3 controllers |
-| **4.3** | Authorization Policies | 🔴 Critique | 3 policies, 4 controllers |
+| Phase   | Description             | Impact      | Fichiers Modifiés                        |
+| ------- | ----------------------- | ----------- | ---------------------------------------- |
+| **1.1** | Model Scopes            | 🟢 Élevé    | `email.ts`, `promo_code.ts`, controllers |
+| **4.1** | Token Encryption        | 🔴 Critique | `email_account.ts`                       |
+| **2.1** | Architecture en Couches | 🟢 Élevé    | 7+ nouveaux fichiers                     |
+| **4.2** | Input Validation        | 🔴 Critique | 3 validators, 3 controllers              |
+| **4.3** | Authorization Policies  | 🔴 Critique | 3 policies, 4 controllers                |
 
 **Résultats:**
+
 - ✅ Sécurité: +150% (tokens chiffrés, validation, autorisation)
 - ✅ Maintenabilité: +90%
 - ✅ Testabilité: +90%
@@ -33,9 +34,11 @@
 ### 🔴 Priorité HAUTE (Production Critical)
 
 #### ✅ Phase 4.2: Input Validation avec VineJS - COMPLÉTÉE
+
 **Effort:** 2-3 heures | **Impact:** 🔴 Critique (Sécurité)
 
 **Fichiers créés:**
+
 ```
 app/validators/
 ├── register_validator.ts         # ✅ Email uniqueness + password confirmation
@@ -44,10 +47,12 @@ app/validators/
 ```
 
 **Controllers mis à jour:**
+
 - ✅ `auth_controller.ts` - validation register/login
 - ✅ `scans_controller.ts` - validation create scan
 
 **Bénéfices obtenus:**
+
 - 🔒 Protection contre injections SQL/XSS
 - ✅ Erreurs 422 claires au lieu de 500
 - 📝 Auto-documentation des APIs
@@ -56,9 +61,11 @@ app/validators/
 ---
 
 #### ✅ Phase 4.3: Authorization avec Bouncer (Policies) - COMPLÉTÉE
+
 **Effort:** 2-3 heures | **Impact:** 🔴 Critique (Sécurité)
 
 **Fichiers créés:**
+
 ```
 app/policies/
 ├── email_policy.ts          # ✅ View/viewAny/delete authorization
@@ -67,12 +74,14 @@ app/policies/
 ```
 
 **Controllers mis à jour:**
+
 - ✅ `email_accounts_controller.ts` - index, connect, destroy
 - ✅ `emails_controller.ts` - trash
 - ✅ `scans_controller.ts` - index, store
 - ✅ `promos_controller.ts` - index, codes
 
 **Bénéfices obtenus:**
+
 - 🔒 Prévention des accès non-autorisés (user A → data user B)
 - ✅ Logique d'autorisation centralisée
 - 📝 Policies réutilisables et testables
@@ -83,21 +92,25 @@ app/policies/
 ### 🟡 Priorité MOYENNE (Qualité & Maintenabilité)
 
 #### Phase 5.1: Tests Unitaires & Fonctionnels
+
 **Effort:** 4-6 heures | **Impact:** 🟢 Élevé (Qualité)
 
 **Pourquoi bientôt:**
+
 - Confiance dans le code lors des modifications
 - Détection des régressions automatique
 - Documentation vivante du comportement
 - Facilite les refactorings futurs
 
 **Installation:**
+
 ```bash
 npm install -D @japa/runner @japa/assert @japa/api-client
 node ace configure @japa/runner
 ```
 
 **Structure des tests:**
+
 ```
 tests/
 ├── unit/
@@ -122,6 +135,7 @@ tests/
 ```
 
 **Exemple de test:**
+
 ```typescript
 // tests/unit/repositories/email_repository.spec.ts
 import { test } from '@japa/runner'
@@ -131,7 +145,7 @@ import { DateTime } from 'luxon'
 test.group('EmailRepository', (group) => {
   test('should find email by gmail message id', async ({ assert }) => {
     const repo = new EmailRepository()
-    
+
     // Create test email
     const email = await repo.create({
       emailAccountId: 1,
@@ -145,7 +159,7 @@ test.group('EmailRepository', (group) => {
 
     // Find it
     const found = await repo.findByGmailMessageId('test-123')
-    
+
     assert.exists(found)
     assert.equal(found?.id, email.id)
   })
@@ -162,10 +176,8 @@ import { test } from '@japa/runner'
 
 test.group('Promos API', () => {
   test('should return promos for authenticated user', async ({ client }) => {
-    const response = await client
-      .get('/api/promos')
-      .loginAs(testUser)
-      
+    const response = await client.get('/api/promos').loginAs(testUser)
+
     response.assertStatus(200)
     response.assertBodyContains({ data: [] })
   })
@@ -178,6 +190,7 @@ test.group('Promos API', () => {
 ```
 
 **Commandes:**
+
 ```bash
 # Lancer tous les tests
 npm test
@@ -193,6 +206,7 @@ node ace test --coverage
 ```
 
 **Checklist:**
+
 - [ ] Installer Japa
 - [ ] Configurer test database
 - [ ] Écrire tests repositories (email, promo_code)
@@ -202,6 +216,7 @@ node ace test --coverage
 - [ ] Viser 80%+ coverage
 
 **Bénéfices:**
+
 - ✅ Confiance lors des modifications
 - 🐛 Détection précoce des bugs
 - 📚 Documentation du comportement
@@ -210,14 +225,17 @@ node ace test --coverage
 ---
 
 #### Phase 1.3: Extraire UserService
+
 **Effort:** 2-3 heures | **Impact:** 🟡 Moyen
 
 **Pourquoi:**
+
 - Séparer la logique utilisateur du controller
 - Réutilisable (OAuth, credentials, SSO futur)
 - Testable isolément
 
 **Fichier à créer:**
+
 ```typescript
 // app/services/user_service.ts
 import User from '#models/user'
@@ -293,6 +311,7 @@ export default class UserService {
 ```
 
 **Fichiers à modifier:**
+
 ```typescript
 // app/controllers/auth_controller.ts
 import UserService from '#services/user_service'
@@ -311,7 +330,7 @@ export default class AuthController {
   async login({ request, response, auth }: HttpContext) {
     const { email, password } = request.only(['email', 'password'])
     const user = await this.userService.verifyCredentials(email, password)
-    
+
     if (!user) {
       return response.unauthorized({ message: 'Invalid credentials' })
     }
@@ -322,9 +341,9 @@ export default class AuthController {
 
   async googleCallback({ request, response, auth }: HttpContext) {
     const { code } = request.only(['code'])
-    
+
     // ... OAuth flow to get user info
-    
+
     const user = await this.userService.createOrFindFromOAuth({
       providerId: userInfo.id,
       email: userInfo.email,
@@ -339,6 +358,7 @@ export default class AuthController {
 ```
 
 **Checklist:**
+
 - [ ] Créer `user_service.ts`
 - [ ] Mettre à jour `auth_controller.ts`
 - [ ] Ajouter tests unitaires pour `UserService`
@@ -346,6 +366,7 @@ export default class AuthController {
 - [ ] Vérifier que OAuth fonctionne
 
 **Bénéfices:**
+
 - ✅ Logique métier centralisée
 - 🧪 Facilement testable
 - 🔄 Réutilisable (API, CLI, etc.)
@@ -356,11 +377,13 @@ export default class AuthController {
 ### 🟢 Priorité BASSE (Nice to Have)
 
 #### Phase 1.2: Centraliser la Configuration
+
 **Effort:** 1 heure | **Impact:** 🟢 Faible
 
 **Fichier existant:** `config/services.ts` (déjà créé)
 
 **Fichiers à modifier:**
+
 ```typescript
 // app/services/gmail_o_auth_service.ts
 import config from '#config/services'
@@ -381,6 +404,7 @@ return response.redirect(config.frontend.url + '/dashboard')
 ```
 
 **Checklist:**
+
 - [ ] Mettre à jour `gmail_o_auth_service.ts`
 - [ ] Mettre à jour `openai_service.ts`
 - [ ] Mettre à jour `auth_controller.ts`
@@ -390,9 +414,11 @@ return response.redirect(config.frontend.url + '/dashboard')
 ---
 
 #### Phase 1.4: Exceptions Personnalisées
+
 **Effort:** 2-3 heures | **Impact:** 🟢 Faible
 
 **Fichiers à créer:**
+
 ```typescript
 // app/exceptions/oauth_exception.ts
 import { Exception } from '@adonisjs/core/exceptions'
@@ -415,10 +441,12 @@ export default class OAuthException extends Exception {
 
   async handle(error: this, ctx: HttpContext) {
     ctx.response.status(error.status).send({
-      errors: [{
-        message: error.message,
-        code: error.code,
-      }],
+      errors: [
+        {
+          message: error.message,
+          code: error.code,
+        },
+      ],
     })
   }
 }
@@ -442,6 +470,7 @@ export default class PromoExtractionException extends Exception {
 ```
 
 **Utilisation:**
+
 ```typescript
 // app/services/openai_service.ts
 if (!assistantId) {
@@ -459,9 +488,11 @@ if (Date.now() - startTime > 30000) {
 ---
 
 #### Phase 2.2 & 2.3: Repositories Complets
+
 **Effort:** 2-3 heures | **Impact:** 🟢 Faible
 
 **Fichiers à créer:**
+
 ```
 app/repositories/
 ├── user_repository.ts
@@ -474,11 +505,13 @@ app/repositories/
 ---
 
 #### Phase 3.1-3.3: Interfaces & Providers
-**Effort:** 6-8 heures | **Impact:** 🟢 Faible*
 
-*Sauf si vous prévoyez de supporter Outlook, Yahoo Mail, etc.
+**Effort:** 6-8 heures | **Impact:** 🟢 Faible\*
+
+\*Sauf si vous prévoyez de supporter Outlook, Yahoo Mail, etc.
 
 **Fichiers à créer:**
+
 ```
 app/contracts/
 ├── oauth_provider.ts      # Interface générique OAuth
@@ -491,7 +524,8 @@ app/providers/
 └── openai_extractor.ts         # Implémentation OpenAI
 ```
 
-**Bénéfice:** 
+**Bénéfice:**
+
 - Facilite le changement de provider
 - Testable avec mocks
 - Extensible (ajout Outlook, Claude, etc.)
@@ -501,9 +535,11 @@ app/providers/
 ## 🗺️ Stratégie de Migration
 
 ### Option A: Big Bang (Non Recommandé)
+
 Tout faire en une fois en 1-2 semaines.
 
 **❌ Risques:**
+
 - Beaucoup de bugs potentiels
 - Bloque les nouvelles features
 - Difficile à tester progressivement
@@ -511,6 +547,7 @@ Tout faire en une fois en 1-2 semaines.
 ### Option B: Migration Progressive (✅ Recommandé)
 
 #### Semaine 1: Sécurité
+
 - ✅ **FAIT:** Token Encryption
 - [ ] Phase 4.2: Validators (2-3h)
 - [ ] Phase 4.3: Policies (2-3h)
@@ -518,6 +555,7 @@ Tout faire en une fois en 1-2 semaines.
 **Résultat:** Application sécurisée pour la production
 
 #### Semaine 2: Qualité
+
 - [ ] Phase 5.1: Tests critiques (4-6h)
   - Tests des repositories
   - Tests des endpoints critiques (auth, promos)
@@ -526,6 +564,7 @@ Tout faire en une fois en 1-2 semaines.
 **Résultat:** Confiance dans le code, détection de régressions
 
 #### Semaine 3: Refactoring Progressif
+
 - [ ] Phase 1.3: UserService (2-3h)
 - [ ] Phase 1.2: Configuration (1h)
 - [ ] Tests pour le nouveau code
@@ -533,6 +572,7 @@ Tout faire en une fois en 1-2 semaines.
 **Résultat:** Code plus maintenable
 
 #### Semaine 4+: Nice to Have
+
 - [ ] Phase 1.4: Exceptions
 - [ ] Phase 2.2-2.3: Repositories complets
 - [ ] Plus de tests (viser 80% coverage)
@@ -544,6 +584,7 @@ Tout faire en une fois en 1-2 semaines.
 ## 📋 Checklist par Feature
 
 ### Avant de Déployer en Production
+
 - [x] Tokens chiffrés
 - [x] Model scopes pour éviter SQL injection
 - [x] Repositories pour abstraction données
@@ -555,6 +596,7 @@ Tout faire en une fois en 1-2 semaines.
 - [ ] Rate limiting sur les endpoints
 
 ### Pour une V2 Propre
+
 - [ ] UserService extrait
 - [ ] Configuration centralisée
 - [ ] Exceptions personnalisées
@@ -563,6 +605,7 @@ Tout faire en une fois en 1-2 semaines.
 - [ ] Documentation API (Swagger/OpenAPI)
 
 ### Pour Scaler (Multi-providers)
+
 - [ ] Interfaces pour providers
 - [ ] Adapter pattern
 - [ ] Factory pattern pour créer providers
@@ -575,6 +618,7 @@ Tout faire en une fois en 1-2 semaines.
 ### Lors du Refactoring
 
 1. **Toujours écrire un test AVANT de refactorer**
+
    ```bash
    # Créer un test qui valide le comportement actuel
    # Refactorer
@@ -586,6 +630,7 @@ Tout faire en une fois en 1-2 semaines.
    - Commits séparés pour refactoring vs features
 
 3. **Utiliser feature flags pour migration progressive**
+
    ```typescript
    // Permet de rollback facilement
    if (env.get('USE_NEW_SERVICE') === 'true') {
@@ -596,11 +641,12 @@ Tout faire en une fois en 1-2 semaines.
    ```
 
 4. **Garder l'ancien code en parallèle temporairement**
+
    ```
    app/services/
    ├── gmail_scan_service.ts      # Ancien (déprécié)
    └── gmail_scan_service_v2.ts   # Nouveau
-   
+
    # Après validation complète:
    # - Supprimer v1
    # - Renommer v2 → v1
@@ -609,16 +655,18 @@ Tout faire en une fois en 1-2 semaines.
 ### Conventions de Code
 
 1. **Repositories:**
+
    ```typescript
    // Toujours retourner des models ou null
    async findById(id: number): Promise<Model | null>
-   
+
    // Pas d'exceptions dans les find
    // Exceptions seulement dans findOrFail
    async findByIdOrFail(id: number): Promise<Model>
    ```
 
 2. **Services:**
+
    ```typescript
    // Peuvent throw des exceptions métier
    async doSomething(): Promise<Result> {
@@ -641,27 +689,31 @@ Tout faire en une fois en 1-2 semaines.
 ### Gestion des Erreurs
 
 1. **Exceptions métier:**
+
    ```typescript
    throw PromoExtractionException.timeout()
    // Message clair, code d'erreur, status HTTP
    ```
 
 2. **Validation:**
+
    ```typescript
    // VineJS génère automatiquement des erreurs 422
    const data = await request.validateUsing(validator)
    ```
 
 3. **Authorization:**
+
    ```typescript
    // Bouncer génère automatiquement des erreurs 403
    await bouncer.authorize('view', resource)
    ```
 
 4. **Logging:**
+
    ```typescript
    import logger from '@adonisjs/core/services/logger'
-   
+
    logger.error({ err: error, context: {...} }, 'Failed to scan emails')
    // Logs structurés pour monitoring
    ```
@@ -669,19 +721,20 @@ Tout faire en une fois en 1-2 semaines.
 ### Performance
 
 1. **Utiliser les scopes pour éviter N+1 queries:**
+
    ```typescript
    // ❌ Mauvais
    const emails = await Email.all()
    for (const email of emails) {
      await email.load('promoCodes') // N+1 query
    }
-   
+
    // ✅ Bon
-   const emails = await Email.query()
-     .apply(scopes => scopes.withRelations())
+   const emails = await Email.query().apply((scopes) => scopes.withRelations())
    ```
 
 2. **Pagination obligatoire:**
+
    ```typescript
    // Toujours paginer les listes
    .paginate(page, limit)
@@ -697,11 +750,12 @@ Tout faire en une fois en 1-2 semaines.
 ### Sécurité
 
 1. **Jamais trust les inputs:**
+
    ```typescript
    // ❌ Dangereux
    const { emailAccountId } = request.only(['emailAccountId'])
    const account = await EmailAccount.find(emailAccountId)
-   
+
    // ✅ Sécurisé
    const data = await request.validateUsing(validator)
    const account = await EmailAccount.findOrFail(data.emailAccountId)
@@ -709,23 +763,26 @@ Tout faire en une fois en 1-2 semaines.
    ```
 
 2. **Toujours vérifier ownership:**
+
    ```typescript
    // Utiliser les scopes ou policies
    await bouncer.with('EmailPolicy').authorize('view', email)
    ```
 
 3. **Rate limiting:**
+
    ```typescript
    // Dans start/kernel.ts
-   router.use([
-     () => import('@adonisjs/limiter/throttle_requests_middleware'),
-   ])
-   
-   // Dans routes
-   .use(throttle({
-     duration: '1 minute',
-     requests: 60,
-   }))
+   router
+     .use([() => import('@adonisjs/limiter/throttle_requests_middleware')])
+
+     // Dans routes
+     .use(
+       throttle({
+         duration: '1 minute',
+         requests: 60,
+       })
+     )
    ```
 
 ---
@@ -733,6 +790,7 @@ Tout faire en une fois en 1-2 semaines.
 ## 📚 Ressources
 
 ### Documentation Officielle
+
 - [AdonisJS Docs](https://docs.adonisjs.com/)
 - [Lucid ORM](https://docs.adonisjs.com/guides/database/orm)
 - [VineJS Validation](https://vinejs.dev/)
@@ -740,12 +798,14 @@ Tout faire en une fois en 1-2 semaines.
 - [Japa Testing](https://japa.dev/)
 
 ### Design Patterns
+
 - [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
 - [Service Layer Pattern](https://martinfowler.com/eaaCatalog/serviceLayer.html)
 - [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ### Exemples de Projets AdonisJS
+
 - [AdonisJS Official Examples](https://github.com/adonisjs)
 - [Adocasts](https://adocasts.com/) - Tutoriels vidéo
 
@@ -754,6 +814,7 @@ Tout faire en une fois en 1-2 semaines.
 ## 🎯 Plan d'Action Recommandé
 
 ### Cette Semaine (Must Have)
+
 1. ✅ Model Scopes - **FAIT**
 2. ✅ Token Encryption - **FAIT**
 3. ✅ Repositories - **FAIT**
@@ -763,6 +824,7 @@ Tout faire en une fois en 1-2 semaines.
 **Résultat:** Application production-ready et sécurisée
 
 ### Semaine Prochaine (Should Have)
+
 6. ⏰ **Phase 5.1 - Tests** (4-6h)
    - Tests repositories
    - Tests API endpoints
@@ -771,6 +833,7 @@ Tout faire en une fois en 1-2 semaines.
 **Résultat:** Confiance dans le code
 
 ### Dans 2 Semaines (Nice to Have)
+
 7. Phase 1.3 - UserService (2-3h)
 8. Phase 1.2 - Configuration (1h)
 9. Plus de tests (viser 60%+ coverage)
@@ -778,6 +841,7 @@ Tout faire en une fois en 1-2 semaines.
 **Résultat:** Code maintenable
 
 ### Futur (Optional)
+
 10. Phase 1.4 - Exceptions
 11. Phase 2.2-2.3 - Repositories complets
 12. Phase 3.x - Interfaces (si multi-providers)

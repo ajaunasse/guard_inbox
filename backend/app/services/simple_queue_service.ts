@@ -2,6 +2,8 @@ import ScanJob from '#models/scan_job'
 import EmailAccount from '#models/email_account'
 import GmailScanServiceV2 from '#services/gmail_scan_service_v2'
 import GmailMessageFetcher from '#services/gmail_message_fetcher'
+import GmailOAuthService from '#services/gmail_o_auth_service'
+import OpenAIService from '#services/openai_service'
 import PromoExtractionService from '#services/promo_extraction_service'
 import EmailRepository from '#repositories/email_repository'
 import PromoCodeRepository from '#repositories/promo_code_repository'
@@ -83,8 +85,10 @@ export default class SimpleQueueService {
         const emailAccount = await EmailAccount.findOrFail(job.emailAccountId)
 
         // Create scan service with dependencies
-        const gmailMessageFetcher = new GmailMessageFetcher()
-        const promoExtractionService = new PromoExtractionService()
+        const gmailOAuthService = new GmailOAuthService()
+        const gmailMessageFetcher = new GmailMessageFetcher(gmailOAuthService)
+        const openaiService = new OpenAIService()
+        const promoExtractionService = new PromoExtractionService(openaiService)
         const emailRepository = new EmailRepository()
         const promoCodeRepository = new PromoCodeRepository()
 

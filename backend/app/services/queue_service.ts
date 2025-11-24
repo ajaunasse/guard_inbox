@@ -1,5 +1,5 @@
 import { Queue, Worker, Job } from 'bullmq'
-import Redis from 'ioredis'
+import { Redis } from 'ioredis'
 import queueConfig from '#config/queue'
 import GmailScanServiceV2 from '#services/gmail_scan_service_v2'
 import GmailMessageFetcher from '#services/gmail_message_fetcher'
@@ -14,7 +14,7 @@ import ScanJob from '#models/scan_job'
 // Redis connection (lazy initialization)
 let connection: Redis | null = null
 
-function getRedisConnection() {
+function getRedisConnection(): Redis {
   if (!connection) {
     connection = new Redis({
       host: queueConfig.redis.host,
@@ -22,7 +22,7 @@ function getRedisConnection() {
       password: queueConfig.redis.password,
       maxRetriesPerRequest: null,
       // Add retry strategy
-      retryStrategy: (times) => {
+      retryStrategy: (times: number) => {
         if (times > 10) {
           console.error('Redis connection failed after 10 retries')
           return null
@@ -33,7 +33,7 @@ function getRedisConnection() {
       },
     })
 
-    connection.on('error', (error) => {
+    connection.on('error', (error: Error) => {
       console.error('Redis connection error:', error.message)
     })
 

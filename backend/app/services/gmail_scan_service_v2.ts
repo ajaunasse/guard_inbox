@@ -118,9 +118,7 @@ export default class GmailScanServiceV2 {
 
     // 6. Delete emails from Gmail if auto-delete is enabled
     if (emailAccount.autoDeleteEmails && messagesToDelete.length > 0) {
-      console.log(
-        `Auto-delete enabled: moving ${messagesToDelete.length} emails to Gmail trash...`
-      )
+      console.log(`Auto-delete enabled: moving ${messagesToDelete.length} emails to Gmail trash...`)
       const deletedCount = await this.gmailMessageFetcher.batchTrashMessages(
         emailAccount.accessToken,
         emailAccount.refreshToken,

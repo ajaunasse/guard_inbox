@@ -13,10 +13,6 @@ export const registerValidator = vine.compile(
         const user = await db.from('users').where('email', value).first()
         return !user
       }),
-    password: vine
-      .string()
-      .minLength(8)
-      .maxLength(100)
-      .confirmed(),
+    password: vine.string().minLength(8).maxLength(100).confirmed(),
   })
 )

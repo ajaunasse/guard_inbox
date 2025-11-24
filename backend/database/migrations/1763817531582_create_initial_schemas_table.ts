@@ -33,7 +33,12 @@ export default class extends BaseSchema {
     // Emails table
     this.schema.createTable('emails', (table) => {
       table.increments('id').primary()
-      table.integer('email_account_id').unsigned().references('id').inTable('email_accounts').onDelete('CASCADE')
+      table
+        .integer('email_account_id')
+        .unsigned()
+        .references('id')
+        .inTable('email_accounts')
+        .onDelete('CASCADE')
       table.string('gmail_message_id').notNullable().unique()
       table.string('subject').notNullable()
       table.string('from').notNullable()
@@ -66,8 +71,16 @@ export default class extends BaseSchema {
     this.schema.createTable('scan_jobs', (table) => {
       table.increments('id').primary()
       table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
-      table.integer('email_account_id').unsigned().references('id').inTable('email_accounts').onDelete('CASCADE')
-      table.enum('status', ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED']).notNullable().defaultTo('PENDING')
+      table
+        .integer('email_account_id')
+        .unsigned()
+        .references('id')
+        .inTable('email_accounts')
+        .onDelete('CASCADE')
+      table
+        .enum('status', ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'])
+        .notNullable()
+        .defaultTo('PENDING')
       table.integer('emails_scanned').nullable()
       table.text('error').nullable()
 

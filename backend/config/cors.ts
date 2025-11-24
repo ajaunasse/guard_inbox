@@ -12,7 +12,10 @@ const corsConfig = defineConfig({
 
   // Only allow specific origins from environment variable
   origin: (requestOrigin) => {
-    const allowedOrigins = env.get('ALLOWED_ORIGINS').split(',').map(o => o.trim())
+    const allowedOrigins = env
+      .get('ALLOWED_ORIGINS')
+      .split(',')
+      .map((o) => o.trim())
 
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!requestOrigin) {

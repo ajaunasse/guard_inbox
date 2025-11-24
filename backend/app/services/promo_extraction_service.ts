@@ -3,7 +3,7 @@ import { inject } from '@adonisjs/core'
 
 @inject()
 export default class PromoExtractionService {
-  constructor(protected openaiService: OpenAIService) { }
+  constructor(protected openaiService: OpenAIService) {}
 
   /**
    * Extract promo codes and discounts from email content

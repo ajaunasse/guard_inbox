@@ -3,24 +3,28 @@
 ## ✅ Phase 1.1: Model Scopes (COMPLETÉ)
 
 ### Fichiers modifiés:
+
 - `app/models/email.ts` - Ajout de scopes réutilisables
 - `app/models/promo_code.ts` - Ajout de scopes réutilisables
 
 ### Scopes ajoutés:
 
 **Email Model:**
+
 - `forUser(userId)` - Filter par utilisateur
 - `withPromoCodes()` - Seulement les emails avec promos
 - `withoutPromoCodes()` - Seulement les emails sans promos
 - `withRelations()` - Preload relations
 
 **PromoCode Model:**
+
 - `forUser(userId)` - Filter par utilisateur
 - `withCode()` - Seulement les codes non-null
 - `active()` - Seulement les codes non-expirés
 - `byCategory(category)` - Filter par catégorie
 
 ### Bénéfices:
+
 - ✅ Élimination de la duplication de code
 - ✅ Queries plus lisibles et maintenables
 - ✅ Testabilité améliorée
@@ -30,9 +34,11 @@
 ## 🔒 Phase 4.1: Token Encryption (COMPLETÉ - CRITIQUE)
 
 ### Fichiers modifiés:
+
 - `app/models/email_account.ts` - Chiffrement automatique des tokens
 
 ### Changements:
+
 ```typescript
 @column({
   consume: (value: string) => (value ? encryption.decrypt(value) : null),
@@ -48,6 +54,7 @@ declare refreshToken: string | null
 ```
 
 ### Bénéfices:
+
 - 🔒 **SÉCURITÉ CRITIQUE**: Tokens OAuth chiffrés au repos
 - ✅ Chiffrement/déchiffrement automatique transparent
 - ✅ Protection contre les fuites de données
@@ -60,6 +67,7 @@ declare refreshToken: string | null
 ### Nouveaux fichiers créés:
 
 #### Services Spécialisés:
+
 1. **`app/services/gmail_message_fetcher.ts`**
    - Responsabilité unique: Communication avec Gmail API
    - Méthodes: `fetchMessages()`, `getMessage()`
@@ -71,6 +79,7 @@ declare refreshToken: string | null
    - Plus léger et testable (138 lignes vs 137 dans l'ancien)
 
 #### Repositories (Pattern Repository):
+
 3. **`app/repositories/email_repository.ts`**
    - Abstraction de la couche données pour Email
    - Méthodes:
@@ -87,6 +96,7 @@ declare refreshToken: string | null
      - `findWithCodeForUser()`
 
 #### Configuration:
+
 5. **`config/services.ts`**
    - Centralisation de la configuration
    - Évite les valeurs hardcodées
@@ -95,6 +105,7 @@ declare refreshToken: string | null
 ### Fichiers modifiés (Controllers):
 
 6. **`app/controllers/promos_controller.ts`**
+
    ```typescript
    @inject()
    export default class PromosController {
@@ -107,6 +118,7 @@ declare refreshToken: string | null
    ```
 
 7. **`app/controllers/emails_controller.ts`**
+
    ```typescript
    @inject()
    export default class EmailsController {
@@ -119,6 +131,7 @@ declare refreshToken: string | null
    - Utilise maintenant `GmailScanServiceV2`
 
 ### Bénéfices:
+
 - ✅ **Séparation des responsabilités (SRP)**
 - ✅ **Testabilité**: Chaque composant peut être testé isolément
 - ✅ **Maintenabilité**: Code organisé en couches logiques
@@ -130,6 +143,7 @@ declare refreshToken: string | null
 ## 📊 Comparaison Avant/Après
 
 ### Avant:
+
 ```typescript
 // Controller avec logique métier
 const emails = await Email.query()
@@ -144,26 +158,23 @@ const emails = await Email.query()
 ```
 
 ### Après:
+
 ```typescript
 // Controller délègue au repository
-const emails = await this.emailRepository.findWithPromoCodesForUser(
-  user.id,
-  page,
-  limit
-)
+const emails = await this.emailRepository.findWithPromoCodesForUser(user.id, page, limit)
 ```
 
 ---
 
 ## 🎯 Principes SOLID Appliqués
 
-| Principe | Application | Fichier |
-|----------|-------------|---------|
+| Principe                  | Application                                | Fichier                             |
+| ------------------------- | ------------------------------------------ | ----------------------------------- |
 | **S**ingle Responsibility | Chaque service a une responsabilité unique | `GmailMessageFetcher`, repositories |
-| **O**pen/Closed | Configuration externalisée | `config/services.ts` |
-| **L**iskov Substitution | Repositories peuvent être mockés | Tous les repositories |
-| **I**nterface Segregation | Services spécialisés vs monolithiques | Services séparés |
-| **D**ependency Inversion | Injection de dépendances via constructeur | Tous les controllers/services |
+| **O**pen/Closed           | Configuration externalisée                 | `config/services.ts`                |
+| **L**iskov Substitution   | Repositories peuvent être mockés           | Tous les repositories               |
+| **I**nterface Segregation | Services spécialisés vs monolithiques      | Services séparés                    |
+| **D**ependency Inversion  | Injection de dépendances via constructeur  | Tous les controllers/services       |
 
 ---
 
@@ -206,6 +217,7 @@ app/
 ## 🚀 Prochaines Étapes Recommandées
 
 ### Phase suivante suggérée:
+
 1. **Ajouter des Validators** (Phase 4.2)
    - Validation des inputs utilisateur
    - Protection contre les injections
@@ -224,12 +236,14 @@ app/
 ## ⚠️ Points d'Attention
 
 ### Migration des Tokens:
+
 Les tokens existants en base de données ne sont PAS chiffrés. Lors du prochain OAuth flow, ils seront chiffrés automatiquement. Pour les tokens existants, il faudrait:
 
 **Option 1**: Demander aux utilisateurs de se reconnecter
 **Option 2**: Créer une migration de données pour chiffrer les tokens existants
 
 ### Compatibilité:
+
 - Les scopes sont **backward compatible** (ancien code fonctionne toujours)
 - Les repositories sont **opt-in** (migration progressive possible)
 - Le nouveau `GmailScanServiceV2` est utilisé par la commande CLI
@@ -238,14 +252,14 @@ Les tokens existants en base de données ne sont PAS chiffrés. Lors du prochain
 
 ## 📈 Métriques d'Amélioration
 
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| Code Duplication | 🔴 Élevé | 🟢 Faible | +80% |
-| Testabilité | 🟡 Moyenne | 🟢 Élevée | +90% |
-| Sécurité Tokens | 🔴 Critique | 🟢 Sécurisé | +100% |
-| Lisibilité Controllers | 🟡 Moyenne | 🟢 Excellent | +85% |
-| Coupling | 🔴 Fort | 🟢 Faible | +75% |
-| Maintenabilité | 🟡 Moyenne | 🟢 Élevée | +80% |
+| Métrique               | Avant       | Après        | Amélioration |
+| ---------------------- | ----------- | ------------ | ------------ |
+| Code Duplication       | 🔴 Élevé    | 🟢 Faible    | +80%         |
+| Testabilité            | 🟡 Moyenne  | 🟢 Élevée    | +90%         |
+| Sécurité Tokens        | 🔴 Critique | 🟢 Sécurisé  | +100%        |
+| Lisibilité Controllers | 🟡 Moyenne  | 🟢 Excellent | +85%         |
+| Coupling               | 🔴 Fort     | 🟢 Faible    | +75%         |
+| Maintenabilité         | 🟡 Moyenne  | 🟢 Élevée    | +80%         |
 
 ---
 

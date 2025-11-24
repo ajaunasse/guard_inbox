@@ -86,10 +86,6 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * Check if error is from OpenAI
    */
   private isOpenAIError(error: unknown): boolean {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      error.constructor.name.includes('OpenAI')
-    )
+    return typeof error === 'object' && error !== null && error.constructor.name.includes('OpenAI')
   }
 }
