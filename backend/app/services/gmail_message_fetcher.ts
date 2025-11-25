@@ -10,6 +10,7 @@ export interface GmailMessage {
   sentAt: string | null
   snippet: string
   body: string
+  size: number | null
 }
 
 @inject()
@@ -30,7 +31,7 @@ export default class GmailMessageFetcher {
     const res = await gmail.users.messages.list({
       userId: 'me',
       maxResults,
-      q: 'category:promotions newer_than:30d',
+      q: 'category:promotions newer_than:90d',
     })
 
     const messages = res.data.messages || []
@@ -53,6 +54,7 @@ export default class GmailMessageFetcher {
       id: messageId,
       format: 'full',
     })
+    console.log('FULL MESSAGE', fullMsg)
 
     const payload = fullMsg.data.payload
     const headers = payload?.headers || []
@@ -62,8 +64,10 @@ export default class GmailMessageFetcher {
     const to = headers.find((h) => h.name === 'To')?.value || ''
     const dateStr = headers.find((h) => h.name === 'Date')?.value
     const snippet = fullMsg.data.snippet || ''
+    const size = fullMsg.data.sizeEstimate ?? null
 
-    // Extract body
+    console.log(`[GMAIL FETCH] Message ${messageId}: sizeEstimate = ${fullMsg.data.sizeEstimate}`)
+
     let body = ''
     if (payload?.body?.data) {
       body = Buffer.from(payload.body.data, 'base64').toString('utf-8')
@@ -84,6 +88,7 @@ export default class GmailMessageFetcher {
       sentAt: dateStr || null,
       snippet,
       body,
+      size,
     }
   }
 

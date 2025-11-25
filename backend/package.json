@@ -32,7 +32,8 @@
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
     "#config/*": "./config/*.js",
-    "#prompts/*": "./app/prompts/*.js"
+    "#prompts/*": "./app/prompts/*.js",
+    "#utils/*": "./app/utils/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -77,15 +78,6 @@
     "boundaries": [
       "./app/controllers/**/*.ts",
       "./app/middleware/*.ts"
-    ]
-  },
-  "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
     ]
   },
   "prettier": "@adonisjs/prettier-config"

@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Tag, Lock, Trash2, Package, Shield } from 'lucide-react';
+import { useAuth } from '../context/useAuth';
+import { LayoutDashboard, Tag, Trash2, Package, Shield, Newspaper, Ticket } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../api/client';
 import './Layout.css';
@@ -80,8 +80,8 @@ export const Layout = () => {
                 {stats.promos > 0 && <span className="count-badge">{stats.promos}</span>}
               </Link>
               <Link to="/vault" className={`sidebar-link ${isActive('/vault') ? 'active' : ''}`}>
-                <Lock size={20} className="sidebar-icon" />
-                <span>Vault</span>
+                <Ticket size={20} className="sidebar-icon" />
+                <span>Promo Codes</span>
                 {stats.vault > 0 && <span className="count-badge">{stats.vault}</span>}
               </Link>
               <Link to="/trash" className={`sidebar-link ${isActive('/trash') ? 'active' : ''}`}>
@@ -94,7 +94,7 @@ export const Layout = () => {
                 className={`sidebar-link ${isActive('/tracking') ? 'active' : ''}`}
               >
                 <Package size={20} className="sidebar-icon" />
-                <span>Tracking</span>
+                <span>Package Tracking</span>
                 <span className="coming-soon-label">Soon</span>
               </Link>
               <Link
@@ -103,6 +103,14 @@ export const Layout = () => {
               >
                 <Shield size={20} className="sidebar-icon" />
                 <span>Phishing</span>
+                <span className="coming-soon-label">Soon</span>
+              </Link>
+              <Link
+                to="/newsletters"
+                className={`sidebar-link ${isActive('/newsletters') ? 'active' : ''}`}
+              >
+                <Newspaper size={20} className="sidebar-icon" />
+                <span>Newsletters</span>
                 <span className="coming-soon-label">Soon</span>
               </Link>
             </nav>

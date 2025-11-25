@@ -54,6 +54,7 @@ router
 
         // Stats
         router.get('stats', [StatsController, 'index']) // Menu counts
+        router.get('stats/dashboard', [StatsController, 'dashboard']) // Dashboard KPIs
       })
       .use(middleware.auth())
       .use(throttle) // General API rate limit

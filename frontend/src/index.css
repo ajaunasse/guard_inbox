@@ -1,20 +1,51 @@
+@import "tailwindcss";
+
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light;
-  color: #111827;
-  background-color: #f9fafb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Emerald Modern Light Palette */
+  --emerald-50: #ECFDF5;
+  --emerald-100: #D1FAE5;
+  --emerald-400: #34D399;
+  --emerald-500: #10B981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-900: #064E3B;
+
+  /* Light Mode Backgrounds */
+  --bg-primary: #F8FAFB;
+  --bg-secondary: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-hover: rgba(16, 185, 129, 0.08);
+
+  /* Text Colors */
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+
+  /* Accent Colors */
+  --cyan-500: #06B6D4;
+  --amber-400: #F59E0B;
+  --rose-500: #F43F5E;
+
+  /* Border Colors */
+  --border-light: #E5E7EB;
+  --border-emerald: rgba(16, 185, 129, 0.2);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #F8FAFB 0%, #ECFDF5 100%);
+  color: var(--text-primary);
 }
 
 * {
@@ -29,9 +60,29 @@ h5,
 h6 {
   margin: 0;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 a {
   text-decoration: none;
   color: inherit;
+}
+
+/* Custom Scrollbar for Light Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
 }

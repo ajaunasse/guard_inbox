@@ -26,7 +26,7 @@ export default class GmailScanServiceV2 {
     const messages = await this.gmailMessageFetcher.fetchMessages(
       emailAccount.accessToken,
       emailAccount.refreshToken,
-      50
+      200
     )
 
     console.log(`Found ${messages.length} messages to scan for account ${emailAccount.id}`)
@@ -60,6 +60,7 @@ export default class GmailScanServiceV2 {
           sentAt: fullMessage.sentAt ? DateTime.fromRFC2822(fullMessage.sentAt) : null,
           snippet: fullMessage.snippet,
           body: fullMessage.body,
+          size: fullMessage.size,
         })
 
         // 4. Extract promo details
