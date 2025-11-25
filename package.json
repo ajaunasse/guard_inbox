@@ -2,6 +2,7 @@
   "name": "cleanbox",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "workspaces": [
     "backend",
     "frontend"
@@ -18,18 +19,5 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7"
-  },
-  "lint-staged": {
-    "backend/**/*.ts": [
-      "bash -c 'cd backend && npx eslint --fix $0'",
-      "bash -c 'cd backend && npx prettier --write $0'"
-    ],
-    "frontend/src/**/*.{ts,tsx}": [
-      "bash -c 'cd frontend && npx eslint --fix $0'",
-      "bash -c 'cd frontend && npx prettier --write $0'"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
   }
 }

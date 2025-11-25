@@ -32,6 +32,9 @@ export default class Email extends BaseModel {
   @column()
   declare body: string | null
 
+  @column()
+  declare size: number | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

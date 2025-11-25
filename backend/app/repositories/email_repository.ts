@@ -10,6 +10,7 @@ export interface CreateEmailData {
   sentAt: DateTime | null
   snippet: string
   body?: string
+  size?: number | null
 }
 
 export default class EmailRepository {

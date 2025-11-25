@@ -20,8 +20,6 @@ export default class RequestLoggerMiddleware {
       userId: ctx.auth?.user?.id || 'anonymous',
     }
 
-    console.log('→ Incoming request:', requestData)
-
     // Continue to next middleware/handler
     await next()
 
@@ -38,11 +36,11 @@ export default class RequestLoggerMiddleware {
 
     // Color code based on status
     if (ctx.response.getStatus() >= 500) {
-      console.error('← Response (Server Error):', responseData)
+      //console.error('← Response (Server Error):', responseData)
     } else if (ctx.response.getStatus() >= 400) {
-      console.warn('← Response (Client Error):', responseData)
+      //  console.warn('← Response (Client Error):', responseData)
     } else {
-      console.log('← Response:', responseData)
+      //  console.log('← Response:', responseData)
     }
   }
 }
